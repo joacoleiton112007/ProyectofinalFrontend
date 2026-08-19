@@ -25,7 +25,7 @@ const navegarACatalogo = () => {
   <div class="app-container">
 
     <header class="navbar">
-      <h1 class="logo"> Mi Tienda de Libros Leiton</h1>
+      <h1 class="logo"> Rendimiento Conceptual</h1>
       <nav class="nav-links">
         <button 
           :class="{ active: pestañaActual === 'inicio' }" 
@@ -94,7 +94,7 @@ body {
 
 .nav-links button.active {
   background-color: #e2e8f0;
-  color: #41b883;
+  color: #b84941;
   font-weight: bold;
 }
 

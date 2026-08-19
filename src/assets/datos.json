@@ -1,229 +1,229 @@
 {
-    "libros":[
-       {
-            "isbn": "978-987-123-456-7",
-            "titulo": "Campera de Cuero",
-            "autor": "Mariana del Río",
-            "genero": "Campera",
-            "editorial": "Ecos del Sur",
-            "anio_publicacion": 2024,
-            "precio_uyu": 850
-        },
-        {
-            "isbn": "978-987-987-654-3",
-            "titulo": "Algoritmos del Destino",
-            "autor": "Julián Vesper",
-            "genero": "Ciencia Ficción",
-            "editorial": "Nebulosa Editores",
-            "anio_publicacion": 2025,
-            "precio_uyu": 1200
-        },
-        {
-            "isbn": "978-987-111-222-3",
-            "titulo": "Crónicas del Queguay",
-            "autor": "Lucía Méndez",
-            "genero": "Histórico",
-            "editorial": "Raíces Libros",
-            "anio_publicacion": 2021,
-            "precio_uyu": 980
-        },
-        {
-            "isbn": "978-987-444-555-6",
-            "titulo": "Susurros en el Pinar",
-            "autor": "Esteban Rocha",
-            "genero": "Terror",
-            "editorial": "Luna Roja",
-            "anio_publicacion": 2023,
-            "precio_uyu": 720
-        },
-        {
-            "isbn": "978-987-777-888-9",
-            "titulo": "El Jardín de los Olvidos",
-            "autor": "Elena Ferreira",
-            "genero": "Realismo Mágico",
-            "editorial": "Viento Celeste",
-            "anio_publicacion": 2022,
-            "precio_uyu": 1100
-        },
-        {
-            "isbn": "978-987-000-111-2",
-            "titulo": "Manual del Programador Errante",
-            "autor": "Damián Byte",
-            "genero": "Educativo",
-            "editorial": "Código Abierto",
-            "anio_publicacion": 2026,
-            "precio_uyu": 1550
-        },
-        {
-            "isbn": "978-987-222-333-4",
-            "titulo": "Cielos de Amatista",
-            "autor": "Sofia Valente",
-            "genero": "Fantasía",
-            "editorial": "Portal de Sueños",
-            "anio_publicacion": 2020,
-            "precio_uyu": 1350
-        },
-        {
-            "isbn": "978-987-333-444-5",
-            "titulo": "El Último Carnaval",
-            "autor": "Andrés Tabárez",
-            "genero": "Drama",
-            "editorial": "Ecos del Sur",
-            "anio_publicacion": 2019,
-            "precio_uyu": 690
-        },
-        {
-            "isbn": "978-987-555-666-7",
-            "titulo": "Código de Silencio",
-            "autor": "Valentina Ortíz",
-            "genero": "Thriller",
-            "editorial": "Luna Roja",
-            "anio_publicacion": 2024,
-            "precio_uyu": 1050
-        },
-        {
-            "isbn": "978-987-666-777-8",
-            "titulo": "La Teoría del Mate",
-            "autor": "Ignacio Silva",
-            "genero": "Ensayo",
-            "editorial": "Raíces Libros",
-            "anio_publicacion": 2023,
-            "precio_uyu": 550
-        },
-        {
-            "isbn": "978-987-888-999-0",
-            "titulo": "Viaje al Centro del Bit",
-            "autor": "Damián Byte",
-            "genero": "Educativo",
-            "editorial": "Código Abierto",
-            "anio_publicacion": 2025,
-            "precio_uyu": 1400
-        },
-        {
-            "isbn": "978-987-999-000-1",
-            "titulo": "Versos de Salitre",
-            "autor": "Clara Píriz",
-            "genero": "Poesía",
-            "editorial": "Viento Celeste",
-            "anio_publicacion": 2022,
-            "precio_uyu": 480
-        },
-        {
-            "isbn": "978-987-121-212-1",
-            "titulo": "Marea Carmesí",
-            "autor": "Roberto Lagos",
-            "genero": "Aventura",
-            "editorial": "Nebulosa Editores",
-            "anio_publicacion": 2021,
-            "precio_uyu": 920
-        },
-        {
-            "isbn": "978-987-232-323-2",
-            "titulo": "El Reloj de Arena Inversa",
-            "autor": "Julián Vesper",
-            "genero": "Ciencia Ficción",
-            "editorial": "Nebulosa Editores",
-            "anio_publicacion": 2026,
-            "precio_uyu": 1150
-        },
-        {
-            "isbn": "978-987-343-434-3",
-            "titulo": "Bajo la Rambla",
-            "autor": "Mariana del Río",
-            "genero": "Misterio",
-            "editorial": "Ecos del Sur",
-            "anio_publicacion": 2023,
-            "precio_uyu": 890
-        },
-        {
-            "isbn": "978-987-454-545-4",
-            "titulo": "Gauchos Galácticos",
-            "autor": "Héctor Borges",
-            "genero": "Ficción Humorística",
-            "editorial": "Portal de Sueños",
-            "anio_publicacion": 2024,
-            "precio_uyu": 760
-        },
-        {
-            "isbn": "978-987-565-656-5",
-            "titulo": "La Herencia del Inmigrante",
-            "autor": "Lucía Méndez",
-            "genero": "Histórico",
-            "editorial": "Raíces Libros",
-            "anio_publicacion": 2018,
-            "precio_uyu": 1250
-        },
-        {
-            "isbn": "978-987-676-767-6",
-            "titulo": "Sombras en el Estadio",
-            "autor": "Esteban Rocha",
-            "genero": "Terror",
-            "editorial": "Luna Roja",
-            "anio_publicacion": 2025,
-            "precio_uyu": 820
-        },
-        {
-            "isbn": "978-987-787-888-0",
-            "titulo": "El Eco de los Tambores",
-            "autor": "Andrés Tabárez",
-            "genero": "Drama",
-            "editorial": "Ecos del Sur",
-            "anio_publicacion": 2022,
-            "precio_uyu": 940
-        },
-        {
-            "isbn": "978-987-898-999-1",
-            "titulo": "Sinfonía en el Puerto",
-            "autor": "Elena Ferreira",
-            "genero": "Realismo Mágico",
-            "editorial": "Viento Celeste",
-            "anio_publicacion": 2024,
-            "precio_uyu": 1080
-        },
-        {
-            "isbn": "978-987-909-010-2",
-            "titulo": "Cero y Uno: La Revolución",
-            "autor": "Damián Byte",
-            "genero": "Educativo",
-            "editorial": "Código Abierto",
-            "anio_publicacion": 2023,
-            "precio_uyu": 1680
-        },
-        {
-            "isbn": "978-987-010-121-3",
-            "titulo": "Viento del Este",
-            "autor": "Sofia Valente",
-            "genero": "Fantasía",
-            "editorial": "Portal de Sueños",
-            "anio_publicacion": 2021,
-            "precio_uyu": 1420
-        },
-        {
-            "isbn": "978-987-121-232-4",
-            "titulo": "Noche de Payada",
-            "autor": "Ignacio Silva",
-            "genero": "Ensayo",
-            "editorial": "Raíces Libros",
-            "anio_publicacion": 2020,
-            "precio_uyu": 590
-        },
-        {
-            "isbn": "978-987-232-343-5",
-            "titulo": "La Red Invisible",
-            "autor": "Valentina Ortíz",
-            "genero": "Thriller",
-            "editorial": "Luna Roja",
-            "anio_publicacion": 2026,
-            "precio_uyu": 1120
-        },
-        {
-            "isbn": "978-987-343-454-6",
-            "titulo": "Horizonte de Eventos",
-            "autor": "Julián Vesper",
-            "genero": "Ciencia Ficción",
-            "editorial": "Nebulosa Editores",
-            "anio_publicacion": 2024,
-            "precio_uyu": 1300
-        }
-    ]
+  "libros": [
+    {
+      "isbn": "978-987-123-456-7",
+      "titulo": "Campera de Cuero",
+      "autor": "Marca de ropa Local",
+      "genero": "Camperas",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2024,
+      "precio_uyu": 850
+    },
+    {
+      "isbn": "978-987-987-654-3",
+      "titulo": "Pantalón de Jean",
+      "autor": "Marca de ropa Local",
+      "genero": "Pantalones",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2025,
+      "precio_uyu": 1200
+    },
+    {
+      "isbn": "978-987-111-222-3",
+      "titulo": "Remeras Lisas",
+      "autor": "Marca de ropa Local",
+      "genero": "Remeras",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2021,
+      "precio_uyu": 980
+    },
+    {
+      "isbn": "978-987-444-555-6",
+      "titulo": "Buzos Lisos",
+      "autor": "Marca de ropa Local",
+      "genero": "Buzos",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2023,
+      "precio_uyu": 720
+    },
+    {
+      "isbn": "978-987-777-888-9",
+      "titulo": "Camisa de Lino",
+      "autor": "Marca de ropa Local",
+      "genero": "Camisas",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2022,
+      "precio_uyu": 1100
+    },
+    {
+      "isbn": "978-987-000-111-2",
+      "titulo": "Campera Rompevientos",
+      "autor": "Marca de ropa Local",
+      "genero": "Camperas",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2026,
+      "precio_uyu": 1550
+    },
+    {
+      "isbn": "978-987-222-333-4",
+      "titulo": "Vestido de Verano",
+      "autor": "Marca de ropa Local",
+      "genero": "Vestidos",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2020,
+      "precio_uyu": 1350
+    },
+    {
+      "isbn": "978-987-333-444-5",
+      "titulo": "Short de Algodón",
+      "autor": "Marca de ropa Local",
+      "genero": "Shorts",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2019,
+      "precio_uyu": 690
+    },
+    {
+      "isbn": "978-987-555-666-7",
+      "titulo": "Saco Formal",
+      "autor": "Marca de ropa Local",
+      "genero": "Sacos",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2024,
+      "precio_uyu": 1050
+    },
+    {
+      "isbn": "978-987-666-777-8",
+      "titulo": "Musculosa Básica",
+      "autor": "Marca de ropa Local",
+      "genero": "Remeras",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2023,
+      "precio_uyu": 550
+    },
+    {
+      "isbn": "978-987-888-999-0",
+      "titulo": "Campera Bomber",
+      "autor": "Marca de ropa Local",
+      "genero": "Camperas",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2025,
+      "precio_uyu": 1400
+    },
+    {
+      "isbn": "978-987-999-000-1",
+      "titulo": "Top Deportivo",
+      "autor": "Marca de ropa Local",
+      "genero": "Deportivo",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2022,
+      "precio_uyu": 480
+    },
+    {
+      "isbn": "978-987-121-212-1",
+      "titulo": "Bermuda de Jean",
+      "autor": "Marca de ropa Local",
+      "genero": "Pantalones",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2021,
+      "precio_uyu": 920
+    },
+    {
+      "isbn": "978-987-232-323-2",
+      "titulo": "Polera de Lana",
+      "autor": "Marca de ropa Local",
+      "genero": "Buzos",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2026,
+      "precio_uyu": 1150
+    },
+    {
+      "isbn": "978-987-343-434-3",
+      "titulo": "Pantalón Jogger",
+      "autor": "Marca de ropa Local",
+      "genero": "Pantalones",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2023,
+      "precio_uyu": 890
+    },
+    {
+      "isbn": "978-987-454-545-4",
+      "titulo": "Campera Puffer",
+      "autor": "Marca de ropa Local",
+      "genero": "Camperas",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2024,
+      "precio_uyu": 760
+    },
+    {
+      "isbn": "978-987-565-656-5",
+      "titulo": "Chaleco de Vestir",
+      "autor": "Marca de ropa Local",
+      "genero": "Sacos",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2018,
+      "precio_uyu": 1250
+    },
+    {
+      "isbn": "978-987-676-767-6",
+      "titulo": "Pantalón Cargo",
+      "autor": "Marca de ropa Local",
+      "genero": "Pantalones",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2025,
+      "precio_uyu": 820
+    },
+    {
+      "isbn": "978-987-787-888-0",
+      "titulo": "Buzo Oversize",
+      "autor": "Marca de ropa Local",
+      "genero": "Buzos",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2022,
+      "precio_uyu": 940
+    },
+    {
+      "isbn": "978-987-898-999-1",
+      "titulo": "Camisa Estampada",
+      "autor": "Marca de ropa Local",
+      "genero": "Camisas",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2024,
+      "precio_uyu": 1080
+    },
+    {
+      "isbn": "978-987-909-010-2",
+      "titulo": "Tapado de Paño",
+      "autor": "Marca de ropa Local",
+      "genero": "Camperas",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2023,
+      "precio_uyu": 1680
+    },
+    {
+      "isbn": "978-987-010-121-3",
+      "titulo": "Pollera Plegada",
+      "autor": "Marca de ropa Local",
+      "genero": "Faldas",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2021,
+      "precio_uyu": 1420
+    },
+    {
+      "isbn": "978-987-121-232-4",
+      "titulo": "Medias Pack x3",
+      "autor": "Marca de ropa Local",
+      "genero": "Accesorios",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2020,
+      "precio_uyu": 590
+    },
+    {
+      "isbn": "978-987-232-343-5",
+      "titulo": "Campera Jean",
+      "autor": "Marca de ropa Local",
+      "genero": "Camperas",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2026,
+      "precio_uyu": 1120
+    },
+    {
+      "isbn": "978-987-343-454-6",
+      "titulo": "Buzo Canguro",
+      "autor": "Marca de ropa Local",
+      "genero": "Buzos",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2024,
+      "precio_uyu": 1300
+    }
+  ]
 }
