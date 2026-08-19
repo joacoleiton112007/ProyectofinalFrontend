@@ -26,7 +26,7 @@ const volverAlCatalogo = () => {
     </button>
 
     <p v-if="librosFiltrados.length === 0" class="sin-resultados">
-      No se encontraron libros para este género.
+      No se encontro la prenda.
     </p>
 
     <div class="grilla-libros" style="margin-top: 30px;">
@@ -49,13 +49,13 @@ const volverAlCatalogo = () => {
 
 h2 {
   color: #2c3e50;
-  border-bottom: 2px solid #41b883;
+  border-bottom: 2px solid #b84141;
   padding-bottom: 10px;
   margin-bottom: 15px;
 }
 
 .genero-titulo {
-  color: #41b883;
+  color: #b84141;
 }
 
 .btn-volver {

@@ -37,7 +37,7 @@ const volverAlCatalogo = () => {
     </div>
     
     <div v-else class="sin-resultados">
-      <p>No se encontró ningún libro con el ISBN proporcionado.</p>
+      <p>No se encontro el usuario login.</p>
     </div>
   </div>
 </template>
@@ -88,7 +88,7 @@ const volverAlCatalogo = () => {
 }
 
 .categoria-tag-link:hover {
-  background-color: #41b883;
+  background-color: #b84b41;
   color: white;
 }
 

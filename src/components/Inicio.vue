@@ -24,16 +24,16 @@ defineProps({
 
     <section class="hero">
 
-      <h2>Libreria Melo </h2>
+      <h2>Usuario minorista </h2>
 
-      <p>Descubrí nuestra colección completa de libros y publicaciones.</p>
+      <p> registrar usuario </p>
 
      
 
       <!-- Al hacer clic ejecuta la función recibida de App.vue -->
 
       <router-link to="/listado" class="btn-principal">
-        Ver Libros
+        Registrarse
       </router-link>
     </section>
   </div>
@@ -100,7 +100,7 @@ defineProps({
 display: inline-block;
 text-decoration: none;
 
-  background-color: #41b883;
+  background-color: #b85141;
 
   color: white;
 

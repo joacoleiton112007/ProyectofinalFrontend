@@ -99,7 +99,7 @@ const librosFiltrados = computed(() => {
 }
 
 .btn-principal {
-  background-color: #41b883;
+  background-color: #b84141;
   color: white;
   border: none;
   padding: 15px 40px;
@@ -118,7 +118,7 @@ const librosFiltrados = computed(() => {
 
 h2 {
   color: #2c3e50;
-  border-bottom: 2px solid #41b883;
+  border-bottom: 2px solid #b84141;
   padding-bottom: 10px;
   margin-bottom: 20px;
 }
@@ -141,7 +141,7 @@ h2 {
 }
 
 .input-busqueda:focus {
-  border-color: #41b883;
+  border-color: #b84141;
 }
 
 .botones-genero {
@@ -166,7 +166,7 @@ h2 {
 }
 
 .botones-genero button.activo {
-  background-color: #41b883;
+  background-color: #b84141;
   color: white;
 }
 

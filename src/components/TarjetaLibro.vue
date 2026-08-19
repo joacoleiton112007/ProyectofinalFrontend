@@ -15,7 +15,7 @@ defineProps({
     <p class="autor">Autor: <strong>{{ libro.autor }}</strong></p>
     
     <router-link :to="'/libro/' + libro.isbn" class="btn-detalles">
-      Ver ficha completa →
+      Ver información →
     </router-link>
   </div>
 </template>
@@ -59,7 +59,7 @@ defineProps({
 .btn-detalles {
   display: inline-block;
   margin-top: 15px;
-  color: #41b883;
+  color: #b84141;
   text-decoration: none;
   font-weight: bold;
   font-size: 0.9rem;

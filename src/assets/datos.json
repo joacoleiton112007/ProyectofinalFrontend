@@ -2,9 +2,9 @@
     "libros":[
        {
             "isbn": "978-987-123-456-7",
-            "titulo": "Las Sombras de la Ciudad Vieja",
+            "titulo": "Campera de Cuero",
             "autor": "Mariana del Río",
-            "genero": "Misterio",
+            "genero": "Campera",
             "editorial": "Ecos del Sur",
             "anio_publicacion": 2024,
             "precio_uyu": 850
