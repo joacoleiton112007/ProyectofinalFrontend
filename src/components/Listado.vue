@@ -6,24 +6,15 @@ import TarjetaPrenda from './TarjetaPrenda.vue';
 
 const store = useLibrosStore();
 
-
-const catalogoVisible = ref(false);
-
-
 const textoBuscado = ref('');
 const generoSeleccionado = ref('Todos');
-
-const mostrarCatalogo = () => {
-  catalogoVisible.value = true;
-};
 
 const generosDisponibles = computed(() => {
   return store.generosDisponibles();
 });
 
-
 const librosFiltrados = computed(() => {
-  if (!catalogoVisible.value || !store.lista) return [];
+  if (!store.lista) return [];
   
   return store.lista.filter(libro => {
     const coincideGenero = generoSeleccionado.value === 'Todos' || libro.genero === generoSeleccionado.value;
@@ -36,84 +27,48 @@ const librosFiltrados = computed(() => {
 
 <template>
   <div class="catalogo-container">
-    
-    <div v-if="!catalogoVisible" class="bton-disparador-container">
-      <button @click="mostrarCatalogo" class="btn-principal">
-        Ver Catálogo
-      </button>
-    </div>
+    <h2>Nuestro Catálogo</h2>
 
-    <div v-else>
-      <h2>Nuestro Catálogo</h2>
+    <div class="busqueda-seccion">
+      <input 
+        v-model="textoBuscado" 
+        type="text" 
+        placeholder="Buscar por título o autor..." 
+        class="input-busqueda"
+      />
 
-      <div class="busqueda-seccion">
-        <input 
-          v-model="textoBuscado" 
-          type="text" 
-          placeholder="Buscar por título o autor..." 
-          class="input-busqueda"
-        />
-
-        <div class="botones-genero">
-          <button 
-            v-for="genero in generosDisponibles" 
-            :key="genero"
-            :class="{ activo: generoSeleccionado === genero }"
-            @click="generoSeleccionado = genero"
-          >
-            {{ genero }}
-          </button>
-        </div>
-      </div>
-
-      <p v-if="librosFiltrados.length === 0" class="sin-resultados">
-        No se encontraron libros que coincidan con tu búsqueda.
-      </p>
-
-      <div class="grilla-libros">
-        <TarjetaPrenda 
-          v-for="libro in librosFiltrados" 
-          :key="libro.isbn" 
-          :libro="libro"
-        />
+      <div class="botones-genero">
+        <button 
+          v-for="genero in generosDisponibles" 
+          :key="genero"
+          :class="{ activo: generoSeleccionado === genero }"
+          @click="generoSeleccionado = genero"
+        >
+          {{ genero }}
+        </button>
       </div>
     </div>
 
+    <p v-if="librosFiltrados.length === 0" class="sin-resultados">
+      No se encontraron libros que coincidan con tu búsqueda.
+    </p>
+
+    <div class="grilla-libros">
+      <TarjetaPrenda 
+        v-for="libro in librosFiltrados" 
+        :key="libro.isbn" 
+        :libro="libro"
+      />
+    </div>
   </div>
 </template>
 
 <style scoped>
-
 .catalogo-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
   font-family: sans-serif;
-}
-
-.bton-disparador-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
-}
-
-.btn-principal {
-  background-color: #b84141;
-  color: white;
-  border: none;
-  padding: 15px 40px;
-  font-size: 1.2rem;
-  font-weight: bold;
-  border-radius: 8px;
-  cursor: pointer;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, background-color 0.2s;
-}
-
-.btn-principal:hover {
-  background-color: #35495e;
-  transform: translateY(-2px);
 }
 
 h2 {
@@ -182,4 +137,4 @@ h2 {
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 25px;
 }
-</style>;
+</style>

@@ -1,16 +1,17 @@
 <script setup>
 import { computed } from 'vue';
 import { RouterView, useRouter, useRoute } from 'vue-router';
+import { useCarritoStore } from '@/stores/carritoStore'; // 1. Importación del Store del Carrito
 
 const router = useRouter();
 const route = useRoute();
-
+const carritoStore = useCarritoStore(); // 2. Instancia para acceder a las prendas agregadas
 
 const pestañaActual = computed(() => {
   if (route.path === '/listado') return 'catalogo';
+  if (route.path === '/carrito') return 'carrito'; // 3. Identificación de la ruta activa del carrito
   return 'inicio';
 });
-
 
 const navegarAInicio = () => {
   router.push('/');
@@ -18,6 +19,10 @@ const navegarAInicio = () => {
 
 const navegarACatalogo = () => {
   router.push('/listado');
+};
+
+const navegarACarrito = () => {
+  router.push('/carrito'); // 4. Navegación al carrito
 };
 </script>
 
@@ -39,19 +44,27 @@ const navegarACatalogo = () => {
         >
           Ver Catálogo
         </button>
+
+        <button 
+          :class="{ active: pestañaActual === 'carrito' }" 
+          @click="navegarACarrito"
+          class="btn-carrito-nav"
+        >
+          🛒 Carrito
+          <span v-if="carritoStore.cantidadTotalItems > 0" class="badge-carrito">
+            {{ carritoStore.cantidadTotalItems }}
+          </span>
+        </button>
       </nav>
     </header>
 
-    
     <main class="content">
-     
       <RouterView />
     </main>
   </div>
 </template>
 
 <style>
-
 body {
   margin: 0;
   font-family: system-ui, -apple-system, sans-serif;
@@ -96,6 +109,23 @@ body {
   background-color: #e2e8f0;
   color: #b84941;
   font-weight: bold;
+}
+
+/* ESTILOS NUEVOS PARA EL BOTÓN Y BADGE DEL CARRITO */
+.btn-carrito-nav {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.badge-carrito {
+  background-color: #b84941;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 2px 7px;
+  border-radius: 12px;
 }
 
 .content {

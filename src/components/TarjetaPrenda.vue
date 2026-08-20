@@ -1,21 +1,46 @@
 <script setup>
-defineProps({
+import { useRouter } from 'vue-router';
+import { useCarritoStore } from '@/stores/carritoStore';
+
+const props = defineProps({
   libro: {
     type: Object,
     required: true
   }
 });
+
+const router = useRouter();
+const carritoStore = useCarritoStore();
+
+const agregarAlCarrito = () => {
+  const resultado = carritoStore.agregarAlCarrito(props.libro);
+
+  if (!resultado.exito) {
+    alert(resultado.mensaje);
+    router.push('/inicio'); // Redirige al login si no inició sesión
+  } else {
+    alert('Prenda agregada al carrito con éxito');
+  }
+};
 </script>
 
 <template>
   <div class="tarjeta-libro">
-    <div class="categoria-tag">{{ libro.genero }}</div>
-    <h3>{{ libro.titulo }}</h3>
-    <p class="autor">Marca: <strong>{{ libro.autor }}</strong></p>
+    <div>
+      <div class="categoria-tag">{{ libro.genero }}</div>
+      <h3>{{ libro.titulo }}</h3>
+      <p class="autor">Marca: <strong>{{ libro.autor }}</strong></p>
+    </div>
     
-    <router-link :to="'/libro/' + libro.isbn" class="btn-detalles">
-      Ver detalle de prenda →
-    </router-link>
+    <div class="acciones">
+      <router-link :to="'/libro/' + libro.isbn" class="btn-detalles">
+        Ver detalle de prenda →
+      </router-link>
+
+      <button type="button" @click="agregarAlCarrito" class="btn-agregar">
+        Agregar al Carrito
+      </button>
+    </div>
   </div>
 </template>
 
@@ -40,6 +65,7 @@ defineProps({
   padding: 4px 10px;
   border-radius: 12px;
   margin-bottom: 10px;
+  display: inline-block;
 }
 
 .tarjeta-libro h3 {
@@ -54,9 +80,15 @@ defineProps({
   color: #64748b;
 }
 
+.acciones {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
+}
+
 .btn-detalles {
   display: inline-block;
-  margin-top: 15px;
   color: #b84141;
   text-decoration: none;
   font-weight: bold;
@@ -65,5 +97,20 @@ defineProps({
 
 .btn-detalles:hover {
   color: #35495e;
+}
+
+.btn-agregar {
+  background-color: #b84141;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-agregar:hover {
+  background-color: #35495e;
 }
 </style>
