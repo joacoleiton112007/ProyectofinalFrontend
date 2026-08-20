@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useLibrosStore } from '@/stores/librosstore';
-import TarjetaLibro from './TarjetaLibro.vue'; 
+import TarjetaPrenda from './TarjetaPrenda.vue'; 
 
 const route = useRoute();
 const router = useRouter();
@@ -19,18 +19,18 @@ const volverAlCatalogo = () => {
 
 <template>
   <div class="catalogo-container">
-    <h2>Libros del género: <span class="genero-titulo">{{ route.params.nombreGenero }}</span></h2>
+    <h2>Categoría: <span class="genero-titulo">{{ route.params.nombreGenero }}</span></h2>
     
     <button @click="volverAlCatalogo" class="btn-volver">
       ← Volver al Catálogo Completo
     </button>
 
     <p v-if="librosFiltrados.length === 0" class="sin-resultados">
-      No se encontro la prenda.
+      No se encontraron prendas para esta categoría.
     </p>
 
     <div class="grilla-libros" style="margin-top: 30px;">
-      <TarjetaLibro 
+      <TarjetaPrenda 
         v-for="libro in librosFiltrados" 
         :key="libro.isbn" 
         :libro="libro" 

@@ -27,8 +27,8 @@ const volverAlCatalogo = () => {
       </router-link>
       
       <h2>{{ libro.titulo }}</h2>
-      <p class="autor">Autor: <strong>{{ libro.autor }}</strong></p>
-      <p class="editorial">Editorial: {{ libro.editorial }}</p>
+      <p class="marca">Marca: <strong>{{ libro.marca }}</strong></p>
+      <p class="coleccion">Coleccion: {{ libro.coleccion}}</p>
       
       <div class="pie-tarjeta">
         <span class="anio">Año: {{ libro.anio_publicacion }}</span>

@@ -3,9 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import InicioView from '@/components/Inicio.vue'
 import ListadoView from '@/components/Listado.vue'
 import GeneroView from '@/components/Genero.vue'
-import LibroView from '@/components/Libro.vue'
-import TarjetaLibroView from '@/components/TarjetaLibro.vue'
-
+import PrendaView from '@/components/Prenda.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -19,8 +17,7 @@ const router = createRouter({
       path: '/listado',
       name: 'listado',
       component: ListadoView
-
-      },
+    },
     {
       // Ruta dinámica para filtrar por género
       path: '/genero/:nombreGenero',
@@ -31,11 +28,9 @@ const router = createRouter({
       // Ruta dinámica para ver el detalle por ISBN
       path: '/libro/:isbn',
       name: 'libro',
-      component: LibroView
+      component: PrendaView
     }
   ],
 })
 
 export default router
-
-

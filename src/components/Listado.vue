@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue';
 import { useLibrosStore } from '@/stores/librosstore';
 
-import TarjetaLibro from './TarjetaLibro.vue';
+import TarjetaPrenda from './TarjetaPrenda.vue';
 
 const store = useLibrosStore();
 
@@ -71,7 +71,7 @@ const librosFiltrados = computed(() => {
       </p>
 
       <div class="grilla-libros">
-        <TarjetaLibro 
+        <TarjetaPrenda 
           v-for="libro in librosFiltrados" 
           :key="libro.isbn" 
           :libro="libro"
