@@ -1,15 +1,15 @@
 <script setup>
 import { computed } from 'vue';
 import { RouterView, useRouter, useRoute } from 'vue-router';
-import { useCarritoStore } from '@/stores/carritoStore'; // 1. Importación del Store del Carrito
+import { useCarritoStore } from '@/stores/carritoStore';
 
 const router = useRouter();
 const route = useRoute();
-const carritoStore = useCarritoStore(); // 2. Instancia para acceder a las prendas agregadas
+const carritoStore = useCarritoStore();
 
 const pestañaActual = computed(() => {
   if (route.path === '/listado') return 'catalogo';
-  if (route.path === '/carrito') return 'carrito'; // 3. Identificación de la ruta activa del carrito
+  if (route.path === '/carrito') return 'carrito';
   return 'inicio';
 });
 
@@ -22,7 +22,7 @@ const navegarACatalogo = () => {
 };
 
 const navegarACarrito = () => {
-  router.push('/carrito'); // 4. Navegación al carrito
+  router.push('/carrito');
 };
 </script>
 
@@ -30,7 +30,7 @@ const navegarACarrito = () => {
   <div class="app-container">
 
     <header class="navbar">
-      <h1 class="logo"> Rendimiento Conceptual</h1>
+      <h1 class="logo">Rendimiento Conceptual</h1>
       <nav class="nav-links">
         <button 
           :class="{ active: pestañaActual === 'inicio' }" 
@@ -61,6 +61,7 @@ const navegarACarrito = () => {
     <main class="content">
       <RouterView />
     </main>
+
   </div>
 </template>
 
@@ -111,7 +112,6 @@ body {
   font-weight: bold;
 }
 
-/*ESTILOS NUEVOS PARA EL BOTÓN Y BADGE DEL CARRITO*/
 .btn-carrito-nav {
   position: relative;
   display: inline-flex;
