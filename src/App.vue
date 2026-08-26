@@ -111,7 +111,7 @@ body {
   font-weight: bold;
 }
 
-/* ESTILOS NUEVOS PARA EL BOTÓN Y BADGE DEL CARRITO */
+/*ESTILOS NUEVOS PARA EL BOTÓN Y BADGE DEL CARRITO*/
 .btn-carrito-nav {
   position: relative;
   display: inline-flex;

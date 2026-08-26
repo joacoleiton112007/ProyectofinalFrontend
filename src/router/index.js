@@ -4,6 +4,7 @@ import InicioView from '@/components/Inicio.vue'
 import ListadoView from '@/components/Listado.vue'
 import GeneroView from '@/components/Genero.vue'
 import PrendaView from '@/components/Prenda.vue'
+import CarritoView from '@/components/Carrito.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -29,6 +30,15 @@ const router = createRouter({
       path: '/libro/:isbn',
       name: 'libro',
       component: PrendaView
+
+        
+    },
+    {
+      // Ruta dinámica para ver el detalle por ISBN
+      path: '/carrito',
+      name: 'Carrito',
+      component: CarritoView
+
     }
   ],
 })
