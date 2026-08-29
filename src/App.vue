@@ -28,10 +28,27 @@ const navegarACarrito = () => {
 
 <template>
   <div class="app-container">
+    <!-- Nivel 1: Header superior blanco con buscador -->
+    <header class="header-top">
+      <div class="logo" @click="navegarAInicio">
+        <h2>Rendimiento Conceptual</h2>
+      </div>
 
-    <header class="navbar">
-      <h1 class="logo">Rendimiento Conceptual</h1>
-      <nav class="nav-links">
+      <div class="search-bar-container">
+        <input type="text" placeholder="Buscar productos..." />
+      </div>
+
+      <div class="header-actions">
+        
+        <button class="action-btn">
+          <span>👤</span> Cuenta
+        </button>
+      </div>
+    </header>
+
+    <!-- Nivel 2: Barra de navegación oscura estilo e-commerce -->
+    <nav class="main-navbar">
+      <div class="nav-links">
         <button 
           :class="{ active: pestañaActual === 'inicio' }" 
           @click="navegarAInicio"
@@ -44,91 +61,148 @@ const navegarACarrito = () => {
         >
           Ver Catálogo
         </button>
+        <button @click="navegarACatalogo">Mujer</button>
+        <button @click="navegarACatalogo">Hombre</button>
+        <button @click="navegarACatalogo">Complementos</button>
+      </div>
 
-        <button 
-          :class="{ active: pestañaActual === 'carrito' }" 
-          @click="navegarACarrito"
-          class="btn-carrito-nav"
-        >
-          🛒 Carrito
-          <span v-if="carritoStore.cantidadTotalItems > 0" class="badge-carrito">
-            {{ carritoStore.cantidadTotalItems }}
-          </span>
-        </button>
-      </nav>
-    </header>
+      <div class="cart-shortcut" @click="navegarACarrito">
+        <span>🛒</span>
+        <span class="cart-total">$0,00</span>
+        <span v-if="carritoStore.cantidadTotalItems > 0" class="badge-carrito">
+          {{ carritoStore.cantidadTotalItems }}
+        </span>
+      </div>
+    </nav>
 
+    <!-- Contenido dinámico -->
     <main class="content">
       <RouterView />
     </main>
-
   </div>
 </template>
 
-<style>
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, sans-serif;
-  background-color: #f8fafc;
-  color: #1e293b;
+<style scoped>
+.app-container {
+  min-height: 100vh;
+  background-color: #d9d0c9;
 }
 
-.navbar {
+/* Header Superior Blanco */
+.header-top {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+  padding: 15px 40px;
   background-color: #ffffff;
-  padding: 15px 30px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .logo {
-  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.logo h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #111111;
   margin: 0;
-  color: #0f172a;
+  letter-spacing: -0.5px;
+}
+
+.search-bar-container {
+  flex: 1;
+  max-width: 550px;
+  margin: 0 30px;
+}
+
+.search-bar-container input {
+  width: 100%;
+  padding: 10px 16px;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.search-bar-container input:focus {
+  outline: none;
+  background-color: #584949;
+  border-color: #b53838;
+}
+
+.header-actions {
+  display: flex;
+  gap: 20px;
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #000000;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Barra Oscura de Navegación */
+.main-navbar {
+  background-color: #3c4a57;
+  padding: 0 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 46px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 8px;
 }
 
 .nav-links button {
   background: none;
   border: none;
-  font-size: 1rem;
-  padding: 8px 16px;
-  margin-left: 10px;
-  cursor: pointer;
-  color: #64748b;
-  border-radius: 6px;
+  color: #cccccc;
+  font-size: 0.85rem;
   font-weight: 500;
-  transition: all 0.2s;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: color 0.2s;
 }
 
 .nav-links button:hover {
-  background-color: #f1f5f9;
-  color: #0f172a;
+  color: #ffffff;
 }
 
 .nav-links button.active {
-  background-color: #e2e8f0;
-  color: #b84941;
-  font-weight: bold;
+  color: #ffffff;
+  font-weight: 700;
 }
 
-.btn-carrito-nav {
-  position: relative;
-  display: inline-flex;
+/* Carrito en la Barra Oscura */
+.cart-shortcut {
+  display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  position: relative;
 }
 
 .badge-carrito {
-  background-color: #b84941;
-  color: white;
-  font-size: 0.75rem;
-  font-weight: bold;
-  padding: 2px 7px;
-  border-radius: 12px;
+  background-color: #b53838;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
 }
 
 .content {
-  padding: 20px;
+  padding: 30px 40px;
 }
 </style>

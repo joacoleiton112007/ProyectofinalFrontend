@@ -17,7 +17,7 @@ const agregarAlCarrito = () => {
 
   if (!resultado.exito) {
     alert(resultado.mensaje);
-    router.push('/inicio'); // Redirige al login si no inició sesión
+    router.push('/inicio');
   } else {
     alert('Prenda agregada al carrito con éxito');
   }
@@ -25,92 +25,167 @@ const agregarAlCarrito = () => {
 </script>
 
 <template>
-  <div class="tarjeta-libro">
-    <div>
-      <div class="categoria-tag">{{ libro.genero }}</div>
-      <h3>{{ libro.titulo }}</h3>
-      <p class="autor">Marca: <strong>{{ libro.autor }}</strong></p>
-    </div>
-    
-    <div class="acciones">
-      <router-link :to="'/libro/' + libro.isbn" class="btn-detalles">
-        Ver detalle de prenda →
-      </router-link>
+  <div class="product-card">
+    <!-- Badge de Descuento si existe -->
+    <span v-if="libro.descuento" class="product-badge-discount">
+      -{{ libro.descuento }}%
+    </span>
 
-      <button type="button" @click="agregarAlCarrito" class="btn-agregar">
-        Agregar al Carrito
-      </button>
+    <!-- Imagen de la prenda -->
+    <div class="product-image-container">
+      <img :src="libro.imagen || 'https://via.placeholder.com/200'" :alt="libro.titulo" />
+    </div>
+
+    <!-- Info del producto -->
+    <div class="product-info">
+      <span class="product-category">{{ libro.genero }}</span>
+      <h3 class="product-title">{{ libro.titulo }}</h3>
+      
+      <div class="product-price-box">
+        <span v-if="libro.precioAnterior" class="product-price-old">
+          ${{ libro.precioAnterior }}
+        </span>
+        <span class="product-price-current">
+          ${{ libro.precio || '4,95' }}
+        </span>
+      </div>
+
+      <!-- Acciones sencillas -->
+      <div class="product-actions">
+        <router-link :to="'/libro/' + libro.isbn" class="btn-detalles">
+          Ver detalle →
+        </router-link>
+
+        <button type="button" @click="agregarAlCarrito" class="btn-agregar">
+          Agregar al Carrito
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.tarjeta-libro {
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 20px;
+.product-card {
+  position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  align-items: center;
+  text-align: center;
+  background: #ffffff;
+  padding: 10px;
+  transition: transform 0.2s ease;
 }
 
-.categoria-tag {
-  align-self: flex-start;
-  background-color: #e2e8f0;
-  color: #475569;
+.product-card:hover {
+  transform: translateY(-2px);
+}
+
+.product-badge-discount {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  background-color: #b53838;
+  color: #ffffff;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 0.75rem;
-  font-weight: bold;
-  padding: 4px 10px;
-  border-radius: 12px;
-  margin-bottom: 10px;
-  display: inline-block;
+  font-weight: 700;
+  z-index: 2;
 }
 
-.tarjeta-libro h3 {
-  margin: 0 0 10px 0;
-  font-size: 1.25rem;
-  color: #1e293b;
+.product-image-container {
+  width: 100%;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
 }
 
-.autor {
-  margin: 4px 0;
-  font-size: 0.95rem;
-  color: #64748b;
+.product-image-container img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 
-.acciones {
+.product-info {
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-top: 15px;
+  align-items: center;
+}
+
+.product-category {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #888888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.product-title {
+  font-size: 0.88rem;
+  color: #333333;
+  line-height: 1.3;
+  margin: 0 0 8px 0;
+  font-weight: 400;
+}
+
+.product-price-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.product-price-old {
+  font-size: 0.8rem;
+  color: #999999;
+  text-decoration: line-through;
+}
+
+.product-price-current {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #b53838;
+}
+
+.product-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .btn-detalles {
-  display: inline-block;
-  color: #b84141;
+  color: #666666;
   text-decoration: none;
-  font-weight: bold;
-  font-size: 0.9rem;
+  font-size: 0.78rem;
 }
 
 .btn-detalles:hover {
-  color: #35495e;
+  color: #b53838;
 }
 
 .btn-agregar {
-  background-color: #b84141;
-  color: white;
+  width: 100%;
+  background-color: #b53838;
+  color: #ffffff;
   border: none;
-  padding: 10px;
-  border-radius: 6px;
-  font-weight: bold;
+  padding: 8px 12px;
+  border-radius: 3px;
+  font-size: 0.82rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s ease;
 }
 
 .btn-agregar:hover {
-  background-color: #35495e;
+  background-color: #962c2c;
 }
 </style>

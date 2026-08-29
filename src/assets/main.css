@@ -1,0 +1,265 @@
+/* ==========================================================================
+   VARIABLES GLOBALES & DESIGN SYSTEM (Inspirado en Ropasión)
+   ========================================================================== */
+:root {
+  /* Paleta de colores */
+  --color-primary: #b53838;            /* Rojo/Bordó de los botones de oferta y badges */
+  --color-primary-hover: #962c2c;
+  --color-navbar-bg: #701705;          /* Fondo oscuro del menú de navegación */
+  --color-dark: #111111;               /* Texto principal y títulos */
+  --color-text-main: #444444;          /* Texto secundario */
+  --color-text-muted: #888888;         /* Subtítulos pequeños y precio viejo */
+  --color-bg-main: #f8fafc;            /* Fondo limpio crema */
+  --color-input-bg: #f4f4f4;          /* Fondo buscador */
+  --color-border: #e5e5e5;
+  
+  /* Tipografía */
+  --font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  
+  /* Bordes y Sombras */
+  --radius-sm: 3px;
+  --radius-pill: 50%;
+  --shadow-subtle: 0 2px 5px rgba(0, 0, 0, 0.05);
+
+  /* Transiciones */
+  --transition-fast: all 0.2s ease-in-out;
+}
+
+/* ==========================================================================
+   RESET MODERNO & BASE
+   ========================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family-base);
+  background-color: var(--color-bg-main);
+  color: var(--color-text-main);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   HEADER Y BUSCADOR (Zona Superior)
+   ========================================================================== */
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 40px;
+  background-color: #ffffff;
+}
+
+.search-bar-container {
+  flex: 1;
+  max-width: 600px;
+  margin: 0 30px;
+  position: relative;
+}
+
+.search-bar-container input {
+  width: 100%;
+  padding: 10px 15px 10px 40px;
+  border: 1px solid transparent;
+  background-color: var(--color-input-bg);
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  color: var(--color-dark);
+}
+
+.search-bar-container input:focus {
+  outline: none;
+  background-color: #ffffff;
+  border-color: var(--color-border);
+}
+
+/* ==========================================================================
+   BARRA DE NAVEGACIÓN PRINCIPAL (Fondo Oscuro)
+   ========================================================================== */
+.main-navbar {
+  background-color: var(--color-navbar-bg);
+  padding: 0 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 48px;
+}
+
+.main-navbar nav a {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 500;
+  margin-right: 20px;
+  transition: var(--transition-fast);
+}
+
+.main-navbar nav a:hover {
+  color: #dddddd;
+}
+
+/* ==========================================================================
+   HERO / CATEGORÍAS PRINCIPALES (Grid de 3 Columnas)
+   ========================================================================== */
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 0 20px;
+}
+
+.category-card {
+  position: relative;
+  height: 220px;
+  background-size: cover;
+  background-position: center;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 25px;
+  color: #ffffff;
+}
+
+/* Overlay oscuro sobre las imágenes de categoría */
+.category-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1;
+}
+
+.category-card-content {
+  position: relative;
+  z-index: 2;
+}
+
+.category-card h3 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.category-card p {
+  font-size: 0.9rem;
+  font-weight: 400;
+  margin-bottom: 15px;
+}
+
+.category-card .btn-ofertas {
+  display: inline-block;
+  background-color: var(--color-primary);
+  color: #ffffff;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: var(--transition-fast);
+  border: none;
+  cursor: pointer;
+}
+
+.category-card .btn-ofertas:hover {
+  background-color: var(--color-primary-hover);
+}
+
+/* ==========================================================================
+   CATÁLOGO DE PRODUCTOS (Grid & Tarjetas)
+   ========================================================================== */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 25px;
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.product-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: #ffffff;
+}
+
+/* Badge circular de Descuento (-43%, -50%, etc.) */
+.product-badge-discount {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: var(--color-primary);
+  color: #ffffff;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  z-index: 2;
+}
+
+.product-image-container {
+  width: 100%;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.product-image-container img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* Categoría y Titulado del producto */
+.product-category {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.product-title {
+  font-size: 0.85rem;
+  color: var(--color-text-main);
+  line-height: 1.3;
+  margin-bottom: 8px;
+  font-weight: 400;
+}
+
+/* Contenedor de Precios */
+.product-price-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.product-price-old {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+
+.product-price-current {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}

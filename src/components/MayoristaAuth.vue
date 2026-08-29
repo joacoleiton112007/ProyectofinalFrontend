@@ -116,7 +116,7 @@ const manejarRegistro = () => {
 }
 
 .auth-card {
-  background: white;
+  background: #ffffff;
   padding: 30px;
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);

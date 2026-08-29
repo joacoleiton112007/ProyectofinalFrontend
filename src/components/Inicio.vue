@@ -208,7 +208,7 @@ const handleSubmit = () => {
 }
 
 .hero {
-  background: #ffffff;
+  background: #3c4a57;
   border: 1px solid #e2e8f0;
   padding: 40px 30px;
   border-radius: 12px;
