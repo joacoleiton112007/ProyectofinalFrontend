@@ -319,12 +319,11 @@ const handleSubmit = () => {
   padding: 12px;
   border-radius: 8px;
   cursor: pointer;
-  box-shadow: 0 4px 6px -1px rgba(184, 81, 65, 0.2);
-  transition: background-color 0.2s, transform 0.1s;
+ 
 }
 
 .btn-principal:hover {
-  background-color: #35495e;
+  background-color: #7e1b1b;
 }
 
 .btn-principal:active {

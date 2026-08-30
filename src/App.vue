@@ -31,7 +31,7 @@ const navegarACarrito = () => {
     <!-- Nivel 1: Header superior blanco con buscador -->
     <header class="header-top">
       <div class="logo" @click="navegarAInicio">
-        <h2>Rendimiento Conceptual</h2>
+        <h2>NemBless</h2>
       </div>
 
       <div class="search-bar-container">
@@ -39,7 +39,6 @@ const navegarACarrito = () => {
       </div>
 
       <div class="header-actions">
-        
         <button class="action-btn">
           <span>👤</span> Cuenta
         </button>
@@ -94,7 +93,7 @@ const navegarACarrito = () => {
   align-items: center;
   justify-content: space-between;
   padding: 15px 40px;
-  background-color: #ffffff;
+  background-color: #3C4A57;
 }
 
 .logo {
@@ -104,7 +103,7 @@ const navegarACarrito = () => {
 .logo h2 {
   font-size: 1.3rem;
   font-weight: 700;
-  color: #111111;
+  color: #BAB3B3;
   margin: 0;
   letter-spacing: -0.5px;
 }
@@ -120,14 +119,14 @@ const navegarACarrito = () => {
   padding: 10px 16px;
   border: 1px solid #e2e8f0;
   background-color: #ffffff;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 0.9rem;
 }
 
 .search-bar-container input:focus {
   outline: none;
-  background-color: #584949;
-  border-color: #b53838;
+  background-color: #ffffff;
+  border-color: #7b7878;
 }
 
 .header-actions {
@@ -135,15 +134,24 @@ const navegarACarrito = () => {
   gap: 20px;
 }
 
+/* 1. Botón Cuenta con borde */
 .action-btn {
   background: none;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  padding: 6px 12px;
   cursor: pointer;
   font-size: 0.85rem;
-  color: #000000;
+  color: #ffffff;
   display: flex;
   align-items: center;
   gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  border-color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Barra Oscura de Navegación */
@@ -154,6 +162,7 @@ const navegarACarrito = () => {
   justify-content: space-between;
   align-items: center;
   height: 46px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .nav-links {
@@ -161,27 +170,33 @@ const navegarACarrito = () => {
   gap: 8px;
 }
 
+/* 2. Botones de Navegación con borde */
 .nav-links button {
   background: none;
-  border: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
   color: #cccccc;
   font-size: 0.85rem;
   font-weight: 500;
-  padding: 8px 14px;
+  padding: 6px 12px;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: all 0.2s ease;
 }
 
 .nav-links button:hover {
   color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .nav-links button.active {
   color: #ffffff;
   font-weight: 700;
+  border-color: rgba(255, 255, 255, 0.4);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
-/* Carrito en la Barra Oscura */
+/* 3. Acceso rápido al Carrito con borde */
 .cart-shortcut {
   display: flex;
   align-items: center;
@@ -191,6 +206,15 @@ const navegarACarrito = () => {
   font-size: 0.85rem;
   font-weight: 600;
   position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  padding: 4px 10px;
+  transition: all 0.2s ease;
+}
+
+.cart-shortcut:hover {
+  border-color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .badge-carrito {
