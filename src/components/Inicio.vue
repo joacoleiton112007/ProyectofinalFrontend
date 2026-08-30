@@ -208,7 +208,7 @@ const handleSubmit = () => {
 }
 
 .hero {
-  background: #3c4a57;
+  background: #3c4a57;;
   border: 1px solid #e2e8f0;
   padding: 40px 30px;
   border-radius: 12px;
@@ -244,19 +244,19 @@ const handleSubmit = () => {
 
 .hero h2 {
   font-size: 2rem;
-  color: #0f172a;
+  color: #ffffff;
   margin-bottom: 8px;
 }
 
 .hero p {
   font-size: 1rem;
-  color: #475569;
+  color: #cbd5e1;
   margin-bottom: 25px;
 }
 
 .alerta-error {
   background-color: #fef2f2;
-  color: #991b1b;
+  color: #921919;
   border: 1px solid #fecaca;
   padding: 10px 14px;
   border-radius: 8px;
@@ -292,7 +292,7 @@ const handleSubmit = () => {
 .campo label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #334155;
+  color: #f1f5f9;
 }
 
 .campo input {
