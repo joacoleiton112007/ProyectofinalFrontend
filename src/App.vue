@@ -31,7 +31,7 @@ const navegarACarrito = () => {
     <!-- Nivel 1: Header superior blanco con buscador -->
     <header class="header-top">
       <div class="logo" @click="navegarAInicio">
-        <h2><img src="/src/assets/images/AbastoLogo250x125.png" alt="AbastoLogo"  /></h2>
+        <h2><img src="/src/assets/images/AbastoLogo250x125.png" alt="AbastoLogo"  /></h2> // el logo de la pagina
       </div>
 
       <div class="search-bar-container">

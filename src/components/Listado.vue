@@ -39,7 +39,7 @@ const librosFiltrados = computed(() => {
           {{ genero }}
         </button>
       </div>
-
+// algo
       
     </div>
 
