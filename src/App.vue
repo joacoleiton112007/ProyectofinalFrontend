@@ -2,10 +2,12 @@
 import { computed } from 'vue';
 import { RouterView, useRouter, useRoute } from 'vue-router';
 import { useCarritoStore } from '@/stores/carritoStore';
+import { useLibrosStore } from '@/stores/librosstore'; // Importamos el store de libros
 
 const router = useRouter();
 const route = useRoute();
 const carritoStore = useCarritoStore();
+const librosStore = useLibrosStore(); // Instanciamos el store
 
 const pestañaActual = computed(() => {
   if (route.path === '/listado') return 'catalogo';
@@ -31,11 +33,16 @@ const navegarACarrito = () => {
     <!-- Nivel 1: Header superior blanco con buscador -->
     <header class="header-top">
       <div class="logo" @click="navegarAInicio">
-        <h2><img src="/src/assets/images/AbastoLogo250x125.png" alt="AbastoLogo"  /></h2> // el logo de la pagina
+        <h2><img src="/src/assets/images/AbastoLogo250x125.png" alt="AbastoLogo" /></h2>
       </div>
 
       <div class="search-bar-container">
-        <input type="text" placeholder="Buscar productos..." />
+        <!-- v-model conectado directamente a la variable global del store -->
+        <input 
+          type="text" 
+          v-model="librosStore.textoBuscado" 
+          placeholder="Buscar productos..." 
+        />
       </div>
 
       <div class="header-actions">
@@ -60,7 +67,6 @@ const navegarACarrito = () => {
         >
           Ver Catálogo
         </button>
-      
       </div>
 
       <div class="cart-shortcut" @click="navegarACarrito">

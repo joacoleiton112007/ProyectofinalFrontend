@@ -1,12 +1,11 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useLibrosStore } from '@/stores/librosstore';
-
 import TarjetaPrenda from './TarjetaPrenda.vue';
 
 const store = useLibrosStore();
 
-const textoBuscado = ref('');
+// Mantendremos solo la categoría/género de forma local
 const generoSeleccionado = ref('Todos');
 
 const generosDisponibles = computed(() => {
@@ -16,10 +15,17 @@ const generosDisponibles = computed(() => {
 const librosFiltrados = computed(() => {
   if (!store.lista) return [];
   
+  const termino = (store.textoBuscado || '').toLowerCase().trim();
+
   return store.lista.filter(libro => {
+    // 1. Filtrar por género seleccionado
     const coincideGenero = generoSeleccionado.value === 'Todos' || libro.genero === generoSeleccionado.value;
-    const coincideTexto = libro.titulo.toLowerCase().includes(textoBuscado.value.toLowerCase()) ||
-                          libro.autor.toLowerCase().includes(textoBuscado.value.toLowerCase());
+    
+    // 2. Filtrar por el texto del buscador global (App.vue)
+    const titulo = (libro.titulo || '').toLowerCase();
+    const autor = (libro.autor || '').toLowerCase();
+    const coincideTexto = !termino || titulo.includes(termino) || autor.includes(termino);
+
     return coincideGenero && coincideTexto;
   });
 });
@@ -39,8 +45,6 @@ const librosFiltrados = computed(() => {
           {{ genero }}
         </button>
       </div>
-
-      
     </div>
 
     <!-- Mensaje sin resultados -->
@@ -114,27 +118,6 @@ const librosFiltrados = computed(() => {
   border-color: #b53838;
   color: #ffffff;
   font-weight: 600;
-}
-
-.busqueda-interna {
-  max-width: 300px;
-  width: 100%;
-}
-
-.input-busqueda {
-  padding: 8px 12px;
-  font-size: 0.85rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 3px;
-  width: 100%;
-  box-sizing: border-box;
-  background-color: #fcfcfc;
-}
-
-.input-busqueda:focus {
-  outline: none;
-  border-color: #b53838;
-  background-color: #ffffff;
 }
 
 .sin-resultados {
