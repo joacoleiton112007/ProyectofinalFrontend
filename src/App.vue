@@ -31,7 +31,7 @@ const navegarACarrito = () => {
     <!-- Nivel 1: Header superior blanco con buscador -->
     <header class="header-top">
       <div class="logo" @click="navegarAInicio">
-        <h2>NemBless</h2>
+        <h2><img src="/src/assets/imagenes.png/AbastoLogo250x125.png" alt="Abasto Logo"  /> </h2>
       </div>
 
       <div class="search-bar-container">
@@ -60,9 +60,7 @@ const navegarACarrito = () => {
         >
           Ver Catálogo
         </button>
-        <button @click="navegarACatalogo">Mujer</button>
-        <button @click="navegarACatalogo">Hombre</button>
-        <button @click="navegarACatalogo">Complementos</button>
+        
       </div>
 
       <div class="cart-shortcut" @click="navegarACarrito">
@@ -94,6 +92,7 @@ const navegarACarrito = () => {
   justify-content: space-between;
   padding: 15px 40px;
   background-color: #3C4A57;
+  
 }
 
 .logo {

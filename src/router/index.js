@@ -9,7 +9,7 @@ import MayoristaAuth from '@/components/MayoristaAuth.vue'
 import MayoristaPanel from '@/components/MayoristaPanel.vue'
 import { useMayoristaStore } from '@/stores/mayoristaStore'
 
-const RUTA_SECRET_MAYORISTA = '/LACACADEBRUNODEAXELDEERNESTODEJOACO54321'
+const RUTA_SECRET_MAYORISTA = '/acceso-mayorista-secreto'
 
 const routes = [
   { path: '/', name: 'inicio', component: InicioView },

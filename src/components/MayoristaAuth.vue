@@ -85,12 +85,12 @@ const manejarRegistro = () => {
 
       <form v-else @submit.prevent="manejarRegistro" class="formulario">
         <div class="campo">
-          <label>Razón Social / Nombre Comercial</label>
+          <label>Nombre Comercial</label>
           <input type="text" v-model="regRazonSocial" required placeholder="Distribuidora S.A." />
         </div>
         <div class="campo">
-          <label>RUT / RUC</label>
-          <input type="text" v-model="regRut" required placeholder="123456789012" />
+          <label>Apellido</label>
+          <input type="text" v-model="regRut" required placeholder="Apellido" />
         </div>
         <div class="campo">
           <label>Correo Electrónico</label>
