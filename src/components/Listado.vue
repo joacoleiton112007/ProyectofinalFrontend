@@ -40,14 +40,7 @@ const librosFiltrados = computed(() => {
         </button>
       </div>
 
-      <div class="busqueda-interna">
-        <input 
-          v-model="textoBuscado" 
-          type="text" 
-          placeholder="Filtrar por nombre o marca..." 
-          class="input-busqueda"
-        />
-      </div>
+      
     </div>
 
     <!-- Mensaje sin resultados -->

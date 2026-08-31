@@ -7,8 +7,15 @@ const route = useRoute();
 const router = useRouter();
 const store = useLibrosStore();
 
-
 const libro = computed(() => store.obtenerPorIsbn(route.params.isbn));
+
+const imagenes = import.meta.glob('../assets/images/*', { eager: true, import: 'default' });
+
+const obtenerImagen = (nombreArchivo) => {
+  if (!nombreArchivo) return 'https://via.placeholder.com/300';
+  const claveEncontrada = Object.keys(imagenes).find(key => key.endsWith(nombreArchivo));
+  return claveEncontrada ? imagenes[claveEncontrada] : 'https://via.placeholder.com/300';
+};
 
 const volverAlCatalogo = () => {
   router.push('/listado');
@@ -22,13 +29,17 @@ const volverAlCatalogo = () => {
     </button>
 
     <div v-if="libro" class="tarjeta-completa">
+      <div class="imagen-detalle-container">
+        <img :src="obtenerImagen(libro.imagen)" :alt="libro.titulo" class="imagen-detalle" />
+      </div>
+
       <router-link :to="'/genero/' + libro.genero" class="categoria-tag-link">
         {{ libro.genero }}
       </router-link>
       
       <h2>{{ libro.titulo }}</h2>
-      <p class="marca">Marca: <strong>{{ libro.marca }}</strong></p>
-      <p class="coleccion">Coleccion: {{ libro.coleccion}}</p>
+      <p class="autor">Marca / Origen: <strong>{{ libro.autor }}</strong></p>
+      <p class="editorial">Categoría: <strong>{{ libro.editorial }}</strong></p>
       
       <div class="pie-tarjeta">
         <span class="anio">Año: {{ libro.anio_publicacion }}</span>
@@ -37,7 +48,7 @@ const volverAlCatalogo = () => {
     </div>
     
     <div v-else class="sin-resultados">
-      <p>No se encontro el usuario login.</p>
+      <p>No se encontró la prenda seleccionada.</p>
     </div>
   </div>
 </template>
@@ -73,9 +84,27 @@ const volverAlCatalogo = () => {
   border-radius: 10px;
   padding: 30px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+.imagen-detalle-container {
+  width: 100%;
+  height: 250px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.imagen-detalle {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 
 .categoria-tag-link {
+  align-self: flex-start;
   display: inline-block;
   background-color: #e2e8f0;
   color: #475569;

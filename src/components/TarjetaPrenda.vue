@@ -12,6 +12,17 @@ const props = defineProps({
 const router = useRouter();
 const carritoStore = useCarritoStore();
 
+// Carga todas las imágenes de src/assets/images/
+const imagenes = import.meta.glob('../assets/images/*', { eager: true, import: 'default' });
+
+const obtenerImagen = (nombreArchivo) => {
+  if (!nombreArchivo) return 'https://via.placeholder.com/200';
+  
+  // Busca la clave que termine exactamente con el nombre de archivo del JSON
+  const claveEncontrada = Object.keys(imagenes).find(key => key.endsWith(nombreArchivo));
+  return claveEncontrada ? imagenes[claveEncontrada] : 'https://via.placeholder.com/200';
+};
+
 const agregarAlCarrito = () => {
   const resultado = carritoStore.agregarAlCarrito(props.libro);
 
@@ -33,7 +44,7 @@ const agregarAlCarrito = () => {
 
     <!-- Imagen de la prenda -->
     <div class="product-image-container">
-      <img :src="libro.imagen || 'https://via.placeholder.com/200'" :alt="libro.titulo" />
+      <img :src="obtenerImagen(libro.imagen)" :alt="libro.titulo" />
     </div>
 
     <!-- Info del producto -->
@@ -43,10 +54,10 @@ const agregarAlCarrito = () => {
       
       <div class="product-price-box">
         <span v-if="libro.precioAnterior" class="product-price-old">
-          ${{ libro.precioAnterior }}
+          $U {{ libro.precioAnterior }}
         </span>
         <span class="product-price-current">
-          ${{ libro.precio || '4,95' }}
+          $U {{ libro.precio_uyu }}
         </span>
       </div>
 

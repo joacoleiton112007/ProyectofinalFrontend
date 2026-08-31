@@ -7,7 +7,8 @@
       "genero": "Remeras",
       "editorial": "Indumentaria",
       "anio_publicacion": 2021,
-      "precio_uyu": 980
+      "precio_uyu": 460,
+      "imagen": "Camisa.png"
     },
     {
       "isbn": "978-987-666-777-8",
@@ -16,7 +17,8 @@
       "genero": "Remeras",
       "editorial": "Indumentaria",
       "anio_publicacion": 2023,
-      "precio_uyu": 550
+      "precio_uyu": 435,
+      "imagen": "Musculosa.png"
     },
     {
       "isbn": "978-987-343-454-6",
@@ -25,7 +27,8 @@
       "genero": "Buzos",
       "editorial": "Indumentaria",
       "anio_publicacion": 2024,
-      "precio_uyu": 1300
+      "precio_uyu": 760,
+      "imagen": "MangaLarga.png"
     },
     {
       "isbn": "978-987-333-444-5",
@@ -34,7 +37,8 @@
       "genero": "Shorts",
       "editorial": "Indumentaria",
       "anio_publicacion": 2019,
-      "precio_uyu": 690
+      "precio_uyu": 380,
+      "imagen": "Short.png"
     },
     {
       "isbn": "978-987-987-654-3",
@@ -43,7 +47,8 @@
       "genero": "Pantalones",
       "editorial": "Indumentaria",
       "anio_publicacion": 2025,
-      "precio_uyu": 1200
+      "precio_uyu": 680,
+      "imagen": "Pántalon.png"
     },
     {
       "isbn": "978-987-222-333-4",
@@ -52,7 +57,28 @@
       "genero": "Vestidos",
       "editorial": "Indumentaria",
       "anio_publicacion": 2020,
-      "precio_uyu": 1350
+      "precio_uyu": 680,
+      "imagen": "Vestido.png"
+    },
+    {
+      "isbn": "978-987-121-235-5",
+      "titulo": "Zapatillas Urbanas",
+      "autor": "Marca de ropa Local",
+      "genero": "Calzado",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2025,
+      "precio_uyu": 860,
+      "imagen": "Zapatilla.png"
+    },
+    {
+      "isbn": "978-987-121-236-2",
+      "titulo": "Zapatos de Cuero",
+      "autor": "Marca de ropa Local",
+      "genero": "Calzado",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2024,
+      "precio_uyu": 1480,
+      "imagen": "Zapatos.png"
     },
     {
       "isbn": "978-987-555-666-7",
@@ -61,16 +87,18 @@
       "genero": "Sacos",
       "editorial": "Indumentaria",
       "anio_publicacion": 2024,
-      "precio_uyu": 1050
+      "precio_uyu": 840,
+      "imagen": "Saco.png"
     },
     {
       "isbn": "978-987-121-232-4",
-      "titulo": "Medias Pack x3",
+      "titulo": "Medias Cancan Pack x3",
       "autor": "Marca de ropa Local",
       "genero": "Accesorios",
       "editorial": "Indumentaria",
       "anio_publicacion": 2020,
-      "precio_uyu": 590
+      "precio_uyu": 590,
+      "imagen": "Medias.png"
     },
     {
       "isbn": "978-987-010-121-3",
@@ -79,7 +107,32 @@
       "genero": "Faldas",
       "editorial": "Indumentaria",
       "anio_publicacion": 2021,
-      "precio_uyu": 1420
+      "precio_uyu": 1420,
+      "imagen": "Falda.png"
+    },
+    {
+      "isbn": "978-987-900-001-1",
+      "titulo": "Pack Verano Urbano",
+      "autor": "Marca de ropa Local",
+      "genero": "Packs",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2026,
+      "precio_uyu": 2508,
+      "descuento": 12,
+      "precioAnterior": 3823,
+      "imagen": "Prendas_1.png"
+    },
+    {
+      "isbn": "978-987-900-002-8",
+      "titulo": "Pack Verano Formal",
+      "autor": "Marca de ropa Local",
+      "genero": "Packs",
+      "editorial": "Indumentaria",
+      "anio_publicacion": 2026,
+      "precio_uyu": 2100,
+      "descuento": 16,
+      "precioAnterior": 2500,
+      "imagen": "Prendas_2.png"
     }
   ]
 }
