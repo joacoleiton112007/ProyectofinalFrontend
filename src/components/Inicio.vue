@@ -97,7 +97,7 @@ const handleSubmit = () => {
         </button>
       </div>
 
-      <h2>{{ esLogin ? 'Iniciar Sesión' : 'Registrar Sesion' }}</h2>
+      <h2>{{ esLogin ? 'Iniciar Sesión' : 'Crear Cuenta' }}</h2>
       <p>{{ esLogin ? 'Ingresa tus credenciales para continuar' : 'Crea tu cuenta para acceder a la plataforma' }}</p>
 
       <!-- Alertas de estado -->
@@ -243,12 +243,14 @@ const handleSubmit = () => {
 }
 
 .hero h2 {
+  font-family: 'Dancing Script', cursive;
   font-size: 2rem;
   color: #ffffff;
   margin-bottom: 8px;
 }
 
 .hero p {
+font-family: 'Fira Code', 'Courier New', monospace;
   font-size: 1rem;
   color: #cbd5e1;
   margin-bottom: 25px;

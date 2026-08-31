@@ -85,12 +85,12 @@ const manejarRegistro = () => {
 
       <form v-else @submit.prevent="manejarRegistro" class="formulario">
         <div class="campo">
-          <label>Razón Social / Nombre Comercial</label>
+          <label>Nombre Comercial</label>
           <input type="text" v-model="regRazonSocial" required placeholder="Distribuidora S.A." />
         </div>
         <div class="campo">
-          <label>RUT / RUC</label>
-          <input type="text" v-model="regRut" required placeholder="123456789012" />
+          <label>Apellido</label>
+          <input type="text" v-model="regRut" required placeholder="Apellido" />
         </div>
         <div class="campo">
           <label>Correo Electrónico</label>
@@ -112,7 +112,8 @@ const manejarRegistro = () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #f1f5f9;
+  background-color: #d9d0c9;
+  
 }
 
 .auth-card {
@@ -127,11 +128,13 @@ const manejarRegistro = () => {
 .encabezado {
   text-align: center;
   margin-bottom: 20px;
+  
 }
 
 .encabezado h2 {
   margin: 0;
   color: #0f172a;
+  font-family: 'Dancing Script', cursive;
 }
 
 .encabezado p {
@@ -159,6 +162,7 @@ const manejarRegistro = () => {
 .selector-tabs button.activo {
   color: #1e293b;
   border-bottom: 3px solid #b84941;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .formulario .campo {

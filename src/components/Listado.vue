@@ -99,7 +99,7 @@ const librosFiltrados = computed(() => {
   font-size: 0.82rem;
   font-weight: 500;
   color: #555555;
-  transition: all 0.2s ease;
+  transition: all 0.4s ease;
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
