@@ -34,7 +34,6 @@ const agregarAlCarrito = () => {
   }
 };
 </script>
-
 <template>
   <div class="product-card">
     <!-- Badge de Descuento si existe -->
