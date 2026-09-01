@@ -2,11 +2,11 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
 export const useCarritoStore = defineStore('carrito', () => {
-  // Carga inicial desde localStorage para que no se pierdan al navegar
+  // Carga inicial desde localStorage para persistencia
   const datosGuardados = localStorage.getItem('prendas_carrito');
   const items = ref(datosGuardados ? JSON.parse(datosGuardados) : []);
 
-  // Función para sincronizar los cambios
+  // Función para sincronizar los cambios en el navegador
   const guardarEnStorage = () => {
     localStorage.setItem('prendas_carrito', JSON.stringify(items.value));
   };
@@ -35,17 +35,24 @@ export const useCarritoStore = defineStore('carrito', () => {
       };
     }
 
-    // Busca por isbn o por id para asegurar compatibilidad
+    // Busca por isbn o por id
     const idPrenda = prenda.isbn || prenda.id;
     const existe = items.value.find((item) => (item.isbn || item.id) === idPrenda);
+    const cantidadASumar = prenda.cantidad || 1;
 
     if (existe) {
-      existe.cantidad++;
+      existe.cantidad += cantidadASumar;
     } else {
-      items.value.push({ ...prenda, cantidad: 1 });
+      items.value.push({ 
+        ...prenda, 
+        cantidad: cantidadASumar 
+      });
     }
 
-    guardarEnStorage(); // Guardo en el navegador
+    // Actualiza precios con descuento si corresponde por volumen
+    actualizarPreciosEspeciales();
+
+    guardarEnStorage();
 
     return { 
       exito: true, 
@@ -53,9 +60,43 @@ export const useCarritoStore = defineStore('carrito', () => {
     };
   };
 
+  // Recalcula el precio unitario si el ítem individual alcanza/supera las 10 unidades
+  const actualizarPreciosEspeciales = () => {
+    items.value.forEach(item => {
+      const precioBase = item.precio_uyu || item.precio_original || item.precio;
+      if (!item.precio_original) item.precio_original = precioBase;
+
+      if (item.cantidad >= 10) {
+        item.precio = item.precio_unitario || Math.round(precioBase * 0.7); // 30% OFF Mayorista
+        item.descuentoAplicado = 30;
+      } else {
+        item.precio = item.precio_original;
+        item.descuentoAplicado = 0;
+      }
+    });
+  };
+
+  const ModificarCantidad = (id, nuevaCantidad) => {
+    const item = items.value.find((item) => (item.isbn || item.id) === id);
+    if (item) {
+      if (nuevaCantidad <= 0) {
+        eliminarDelCarrito(id);
+      } else {
+        item.cantidad = nuevaCantidad;
+        actualizarPreciosEspeciales();
+        guardarEnStorage();
+      }
+    }
+  };
+
   const eliminarDelCarrito = (id) => {
     items.value = items.value.filter((item) => (item.isbn || item.id) !== id);
-    guardarEnStorage(); // Actualizo almacenamiento
+    guardarEnStorage();
+  };
+
+  const vaciarCarrito = () => {
+    items.value = [];
+    guardarEnStorage();
   };
 
   const total = computed(() => {
@@ -69,7 +110,9 @@ export const useCarritoStore = defineStore('carrito', () => {
   return { 
     items, 
     agregarAlCarrito, 
+    ModificarCantidad,
     eliminarDelCarrito, 
+    vaciarCarrito,
     total, 
     cantidadTotalItems, 
     estaAutenticado 
