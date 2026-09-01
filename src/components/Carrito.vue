@@ -39,6 +39,8 @@ const irAInicio = () => {
               Marca/Autor: <strong>{{ item.autor || item.marca }}</strong>
             </p>
             <p>Cantidad: <strong>{{ item.cantidad }}</strong></p>
+            <!-- LÍNEA NUEVA: Muestra el precio unitario formateado -->
+            <p>Precio unitario: <strong>${{ Number(item.precio || 0).toLocaleString('es-UY') }}</strong></p>
           </div>
 
           <button 
@@ -51,7 +53,8 @@ const irAInicio = () => {
       </ul>
 
       <div class="resumen">
-        <h3>Total: ${{ carritoStore.total }}</h3>
+        <!-- LÍNEA MODIFICADA: Total con formato de moneda -->
+        <h3>Total: ${{ Number(carritoStore.total || 0).toLocaleString('es-UY') }}</h3>
         <button class="btn-comprar">Finalizar Compra</button>
       </div>
     </div>

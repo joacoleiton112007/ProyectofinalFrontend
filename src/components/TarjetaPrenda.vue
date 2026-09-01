@@ -24,7 +24,13 @@ const obtenerImagen = (nombreArchivo) => {
 };
 
 const agregarAlCarrito = () => {
-  const resultado = carritoStore.agregarAlCarrito(props.libro);
+  // Creamos la propiedad 'precio' leyendo 'precio_uyu'
+  const prendaConPrecio = {
+    ...props.libro,
+    precio: props.libro.precio_uyu || props.libro.precio || 0
+  };
+
+  const resultado = carritoStore.agregarAlCarrito(prendaConPrecio);
 
   if (!resultado.exito) {
     alert(resultado.mensaje);

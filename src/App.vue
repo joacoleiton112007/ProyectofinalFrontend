@@ -33,7 +33,7 @@ const navegarACarrito = () => {
     <!-- Nivel 1: Header superior blanco con buscador -->
     <header class="header-top">
       <div class="logo" @click="navegarAInicio">
-        <h2><img src="/src/assets/images/AbastoLogo250x125.png" alt="AbastoLogo" /></h2>
+        <h2><img src="/src/assets/images/AbastoLogo250x125.png" alt="AbastoLogo" width="300" height="125" /></h2>
       </div>
 
       <div class="search-bar-container">
@@ -70,12 +70,17 @@ const navegarACarrito = () => {
       </div>
 
       <div class="cart-shortcut" @click="navegarACarrito">
-        <span>🛒</span>
-        <span class="cart-total">$0,00</span>
-        <span v-if="carritoStore.cantidadTotalItems > 0" class="badge-carrito">
-          {{ carritoStore.cantidadTotalItems }}
-        </span>
-      </div>
+  <span>🛒</span>
+  <!-- Formateamos el total dinámico desde el store de Pinia -->
+  <span class="cart-total">
+    ${{ Number(carritoStore.total || 0).toLocaleString('es-UY', { minimumFractionDigits: 2 }) }}
+  </span>
+  <span v-if="carritoStore.cantidadTotalItems > 0" class="badge-carrito">
+    {{ carritoStore.cantidadTotalItems }}
+  </span>
+</div>
+
+
     </nav>
 
     <!-- Contenido dinámico -->
@@ -91,7 +96,7 @@ const navegarACarrito = () => {
   background-color: #d9d0c9;
 }
 
-/* Header Superior Blanco */
+/* Header Superior Gris */
 .header-top {
   display: flex;
   align-items: center;
@@ -105,7 +110,7 @@ const navegarACarrito = () => {
 }
 
 .logo h2 {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: #BAB3B3;
   margin: 0;
@@ -124,7 +129,7 @@ const navegarACarrito = () => {
   border: 1px solid #e2e8f0;
   background-color: #ffffff;
   border-radius: 6px;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
 }
 
 .search-bar-container input:focus {
@@ -145,7 +150,7 @@ const navegarACarrito = () => {
   border-radius: 6px;
   padding: 6px 12px;
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 1.1rem;
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -180,7 +185,8 @@ const navegarACarrito = () => {
   border: 1px solid transparent;
   border-radius: 6px;
   color: #cccccc;
-  font-size: 0.85rem;
+  font-size: 1.1rem;
+  
   font-weight: 500;
   padding: 6px 12px;
   cursor: pointer;
