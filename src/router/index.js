@@ -9,13 +9,14 @@ import MayoristaAuth from '@/components/MayoristaAuth.vue'
 import MayoristaPanel from '@/components/MayoristaPanel.vue'
 import { useMayoristaStore } from '@/stores/mayoristaStore'
 
-const RUTA_SECRET_MAYORISTA = '/registro-mayorista31082026' // Ruta secreta para acceso directo a la autenticación de mayorista
+const RUTA_SECRET_MAYORISTA = '/registro-mayorista31082026'
 
 const routes = [
   { path: '/', name: 'inicio', component: InicioView },
   { path: '/listado', name: 'listado', component: ListadoView },
   { path: '/genero/:nombreGenero', name: 'genero', component: GeneroView },
-  { path: '/libro/:isbn', name: 'libro', component: PrendaView },
+  // Ajuste clave: de :isbn a :id para conectar con Laravel
+  { path: '/libro/:id', name: 'libro', component: PrendaView },
   { path: '/carrito', name: 'carrito', component: CarritoView },
   
   // Ruta secreta de acceso directo
@@ -39,13 +40,11 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const mayoristaStore = useMayoristaStore()
 
-  // Si entra a través de la URL secreta, autoriza el acceso permanente en el equipo
   if (to.path === RUTA_SECRET_MAYORISTA) {
     localStorage.setItem('mayorista_desbloqueado', 'true')
     return next('/mayorista/acceso')
   }
 
-  // Protección de las rutas /mayorista
   if (to.path.startsWith('/mayorista')) {
     const desbloqueado = localStorage.getItem('mayorista_desbloqueado') === 'true'
 

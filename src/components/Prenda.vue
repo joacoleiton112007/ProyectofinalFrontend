@@ -1,75 +1,70 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useLibrosStore } from '@/stores/librosstore';
+import { apiFetch } from '@/services/api.js';
 import { useCarritoStore } from '@/stores/carritoStore';
 
 const route = useRoute();
 const router = useRouter();
-const store = useLibrosStore();
 const carritoStore = useCarritoStore();
 
-const libro = computed(() => store.obtenerPorIsbn(route.params.isbn));
+const libro = ref(null);
+const cargando = ref(true);
 
-// Cantidad de prendas (Límite estricto: 1 a 25)
-const cantidad = ref(1);
+// Inicializamos el mínimo en 10 unidades
+const cantidad = ref(10);
 
-watch(cantidad, (nuevoValor) => {
-  if (nuevoValor > 25) {
-    cantidad.value = 25;
-  } else if (nuevoValor < 1 || !nuevoValor) {
-    cantidad.value = 1;
-  }
-});
-
-// 1. Escala por tramos de descuento mayorista
-const porcentajeDescuento = computed(() => {
-  if (cantidad.value >= 20) {
-    return 40; // De 20 a 25 unidades -> 40% OFF
-  } else if (cantidad.value >= 10) {
-    return 30; // De 10 a 19 unidades -> 30% OFF
-  }
-  return 0; // De 1 a 9 unidades -> Sin descuento (0%)
-});
-
-// 2. Precio unitario base real sin ningún descuento aplicado
-const precioUnitarioBase = computed(() => {
-  if (!libro.value) return 0;
-
-  // Tomamos el valor de la prenda directo si existe
-  if (libro.value.precio_unitario) {
-    return libro.value.precio_unitario;
-  }
-
-  // Si el objeto viene con precio total de lote/pack, calculamos el precio individual base
-  const totalLote = libro.value.precio_uyu || libro.value.precio || 0;
-  const unidadesPack = libro.value.pack_unidades || 10;
-  return Math.round(totalLote / unidadesPack);
-});
-
-// 3. Precio unitario final según el tramo de descuento actual
-const precioUnitario = computed(() => {
-  if (!libro.value) return 0;
-
-  if (porcentajeDescuento.value > 0) {
-    const factorDescuento = (100 - porcentajeDescuento.value) / 100;
-    return Math.round(precioUnitarioBase.value * factorDescuento);
-  }
-
-  return precioUnitarioBase.value;
-});
-
-// 4. Totales calculados para la interfaz
-const totalCalculado = computed(() => precioUnitario.value * cantidad.value);
-const totalSinDescuento = computed(() => precioUnitarioBase.value * cantidad.value);
-
+// Carga dinámica de imágenes locales
 const imagenes = import.meta.glob('../assets/images/*', { eager: true, import: 'default' });
 
 const obtenerImagen = (nombreArchivo) => {
   if (!nombreArchivo) return 'https://via.placeholder.com/300';
-  const claveEncontrada = Object.keys(imagenes).find(key => key.endsWith(nombreArchivo));
+  const claveEncontrada = Object.keys(imagenes).find(key => key.toLowerCase().endsWith(nombreArchivo.toLowerCase()));
   return claveEncontrada ? imagenes[claveEncontrada] : 'https://via.placeholder.com/300';
 };
+
+onMounted(async () => {
+  try {
+    libro.value = await apiFetch(`/productos/${route.params.id}`);
+  } catch (error) {
+    console.error('Error al cargar la prenda:', error.message);
+  } finally {
+    cargando.value = false;
+  }
+});
+
+// Forzar que la cantidad nunca baje de 10 ni supere 25
+watch(cantidad, (nuevoValor) => {
+  if (nuevoValor > 25) {
+    cantidad.value = 25;
+  } else if (nuevoValor < 10 || !nuevoValor) {
+    cantidad.value = 10;
+  }
+});
+
+const porcentajeDescuento = computed(() => {
+  if (cantidad.value >= 20) return 40;
+  if (cantidad.value >= 10) return 30;
+  return 0;
+});
+
+// Cálculo unitario para que suba de a 1 remera individual
+const precioPorPrendaBase = computed(() => {
+  if (!libro.value) return 0;
+  const precioPack = Number(libro.value.precio) || 0;
+  return precioPack / 10;
+});
+
+const precioUnitario = computed(() => {
+  if (porcentajeDescuento.value > 0) {
+    const factorDescuento = (100 - porcentajeDescuento.value) / 100;
+    return Math.round(precioPorPrendaBase.value * factorDescuento);
+  }
+  return precioPorPrendaBase.value;
+});
+
+const totalCalculado = computed(() => precioUnitario.value * cantidad.value);
+const totalSinDescuento = computed(() => precioPorPrendaBase.value * cantidad.value);
 
 const volverAlCatalogo = () => {
   router.push('/listado');
@@ -111,19 +106,23 @@ const comprarAhora = () => {
 
     <div v-if="libro" class="tarjeta-completa">
       <div class="imagen-detalle-container">
-        <img :src="obtenerImagen(libro.imagen)" :alt="libro.titulo" class="imagen-detalle" />
+        <img 
+          :src="obtenerImagen(libro.imagen)" 
+          :alt="libro.nombre" 
+          class="imagen-detalle" 
+        />
       </div>
 
-      <router-link :to="'/genero/' + libro.genero" class="categoria-tag-link">
-        {{ libro.genero }}
-      </router-link>
+      <span v-if="libro.categoria" class="categoria-tag-link">
+        {{ libro.categoria.nombre }}
+      </span>
       
-      <h2>{{ libro.titulo }}</h2>
-      <p class="autor">Marca / Origen: <strong>{{ libro.autor }}</strong></p>
-      <p class="editorial">Categoría: <strong>{{ libro.editorial }}</strong></p>
+      <h2>{{ libro.nombre }}</h2>
+      <p v-if="libro.descripcion" class="editorial">
+        {{ libro.descripcion }}
+      </p>
       
       <div class="pie-tarjeta">
-        <span class="anio">Año: {{ libro.anio_publicacion }}</span>
         <div class="precio-container">
           <span v-if="porcentajeDescuento > 0" class="precio-anterior">
             $U {{ totalSinDescuento.toLocaleString('es-UY') }}
@@ -134,11 +133,11 @@ const comprarAhora = () => {
 
       <div class="bloque-acciones">
         <div class="selector-cantidad">
-          <label>Cantidad (Máx. 25 Uds):</label>
+          <label>Cantidad (Mín. 10 - Máx. 25 Uds):</label>
           <div class="controles">
-            <button @click="cantidad > 1 ? cantidad-- : null" :disabled="cantidad <= 1">-</button>
-            <input type="number" v-model.number="cantidad" min="1" max="25" />
-            <button @click="cantidad < 25 ? cantidad++ : null" :disabled="cantidad >= 25">+</button>
+            <button type="button" @click="cantidad > 10 ? cantidad-- : null" :disabled="cantidad <= 10">-</button>
+            <input type="number" v-model.number="cantidad" min="10" max="25" />
+            <button type="button" @click="cantidad < 25 ? cantidad++ : null" :disabled="cantidad >= 25">+</button>
           </div>
           <button type="button" @click="cantidad = 10" class="btn-pack">
             Pack 10 (30% OFF)
@@ -149,7 +148,7 @@ const comprarAhora = () => {
         </div>
 
         <p v-if="porcentajeDescuento > 0" class="aviso-mayorista">
-          🔥 ¡{{ porcentajeDescuento }}% OFF aplicado! ($U {{ precioUnitario }} c/u)
+          🔥 ¡{{ porcentajeDescuento }}% OFF aplicado! ($U {{ precioUnitario.toLocaleString('es-UY') }} c/u)
         </p>
         <p v-else class="aviso-tip">
           💡 Llevá 10 unidades para un 30% OFF o 20 unidades para un 40% OFF.
@@ -166,7 +165,7 @@ const comprarAhora = () => {
       </div>
     </div>
     
-    <div v-else class="sin-resultados">
+    <div v-else-if="!cargando" class="sin-resultados">
       <p>No se encontró la prenda seleccionada.</p>
     </div>
   </div>
@@ -246,7 +245,7 @@ h2 {
   color: #1e293b;
 }
 
-.autor, .editorial {
+.editorial {
   margin: 8px 0;
   font-size: 1.05rem;
   color: #64748b;
@@ -259,11 +258,6 @@ h2 {
   align-items: center;
   border-top: 1px solid #f1f5f9;
   padding-top: 20px;
-}
-
-.anio {
-  color: #94a3b8;
-  font-size: 0.95rem;
 }
 
 .precio-container {
@@ -299,12 +293,14 @@ h2 {
 .selector-cantidad {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 12px;
 }
 
 .selector-cantidad label {
   font-weight: 600;
   color: #475569;
+  width: 100%;
 }
 
 .controles {
@@ -323,8 +319,13 @@ h2 {
   cursor: pointer;
 }
 
+.controles button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .controles input {
-  width: 45px;
+  width: 50px;
   text-align: center;
   border: none;
   font-weight: bold;

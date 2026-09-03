@@ -1,30 +1,41 @@
 <script setup>
-import { ref, computed } from 'vue';
-import { useLibrosStore } from '@/stores/librosstore';
+import { ref, computed, onMounted } from 'vue';
+import { apiFetch } from '@/services/api.js';
 import TarjetaPrenda from './TarjetaPrenda.vue';
 
-const store = useLibrosStore();
-
-// Mantendremos solo la categoría/género de forma local
+const productos = ref([]);
 const generoSeleccionado = ref('Todos');
+const textoBuscado = ref('');
 
-const generosDisponibles = computed(() => {
-  return store.generosDisponibles();
+// Cargar productos desde la API de Laravel al montar el componente
+onMounted(async () => {
+  try {
+    productos.value = await apiFetch('/productos');
+  } catch (error) {
+    console.error('Error al cargar productos:', error.message);
+  }
 });
 
-const librosFiltrados = computed(() => {
-  if (!store.lista) return [];
-  
-  const termino = (store.textoBuscado || '').toLowerCase().trim();
+// Extraer categorías dinámicamente desde la respuesta de Laravel
+const generosDisponibles = computed(() => {
+  const categorias = productos.value
+    .map(p => p.categoria?.nombre || p.genero)
+    .filter(Boolean);
+  return ['Todos', ...new Set(categorias)];
+});
 
-  return store.lista.filter(libro => {
-    // 1. Filtrar por género seleccionado
-    const coincideGenero = generoSeleccionado.value === 'Todos' || libro.genero === generoSeleccionado.value;
-    
-    // 2. Filtrar por el texto del buscador global (App.vue)
-    const titulo = (libro.titulo || '').toLowerCase();
-    const autor = (libro.autor || '').toLowerCase();
-    const coincideTexto = !termino || titulo.includes(termino) || autor.includes(termino);
+// Filtrar por categoría y buscador
+const librosFiltrados = computed(() => {
+  if (!productos.value.length) return [];
+  
+  const termino = textoBuscado.value.toLowerCase().trim();
+
+  return productos.value.filter(producto => {
+    const catNombre = producto.categoria?.nombre || producto.genero;
+    const coincideGenero = generoSeleccionado.value === 'Todos' || catNombre === generoSeleccionado.value;
+    const nombre = (producto.nombre || producto.titulo || '').toLowerCase();
+    const descripcion = (producto.descripcion || '').toLowerCase();
+    const coincideTexto = !termino || nombre.includes(termino) || descripcion.includes(termino);
 
     return coincideGenero && coincideTexto;
   });
@@ -52,11 +63,11 @@ const librosFiltrados = computed(() => {
       <p>No se encontraron prendas que coincidan con la búsqueda.</p>
     </div>
 
-    <!-- Grilla de Productos -->
+    <!-- Grilla de Productos usando el id único de Laravel -->
     <div class="grilla-productos">
       <TarjetaPrenda 
         v-for="libro in librosFiltrados" 
-        :key="libro.isbn" 
+        :key="libro.id || libro.isbn" 
         :libro="libro"
       />
     </div>
@@ -70,7 +81,6 @@ const librosFiltrados = computed(() => {
   padding: 10px 20px 40px;
 }
 
-/* Filtros y Búsqueda */
 .filtros-seccion {
   display: flex;
   flex-direction: column;
@@ -127,7 +137,6 @@ const librosFiltrados = computed(() => {
   padding: 50px 0;
 }
 
-/* Grilla de productos estilo e-commerce */
 .grilla-productos {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));

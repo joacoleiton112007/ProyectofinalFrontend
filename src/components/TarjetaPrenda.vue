@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCarritoStore } from '@/stores/carritoStore';
 
@@ -12,22 +13,20 @@ const props = defineProps({
 const router = useRouter();
 const carritoStore = useCarritoStore();
 
-// Carga todas las imágenes de src/assets/images/
+// Carga dinámica de imágenes locales
 const imagenes = import.meta.glob('../assets/images/*', { eager: true, import: 'default' });
 
 const obtenerImagen = (nombreArchivo) => {
   if (!nombreArchivo) return 'https://via.placeholder.com/200';
   
-  // Busca la clave que termine exactamente con el nombre de archivo del JSON
-  const claveEncontrada = Object.keys(imagenes).find(key => key.endsWith(nombreArchivo));
+  const claveEncontrada = Object.keys(imagenes).find(key => key.toLowerCase().endsWith(nombreArchivo.toLowerCase()));
   return claveEncontrada ? imagenes[claveEncontrada] : 'https://via.placeholder.com/200';
 };
 
 const agregarAlCarrito = () => {
-  // Creamos la propiedad 'precio' leyendo 'precio_uyu'
   const prendaConPrecio = {
     ...props.libro,
-    precio: props.libro.precio_uyu || props.libro.precio || 0
+    precio: props.libro.precio || props.libro.precio_uyu || 0
   };
 
   const resultado = carritoStore.agregarAlCarrito(prendaConPrecio);
@@ -39,36 +38,40 @@ const agregarAlCarrito = () => {
     alert('Prenda agregada al carrito con éxito');
   }
 };
+
+// Mapeo seguro de propiedades (Laravel API vs modelo legacy)
+const tituloProducto = computed(() => props.libro.nombre || props.libro.titulo || '');
+const generoProducto = computed(() => props.libro.categoria?.nombre || props.libro.genero || '');
+const precioProducto = computed(() => props.libro.precio ?? props.libro.precio_uyu ?? 0);
+const idProducto = computed(() => props.libro.id || props.libro.isbn);
 </script>
+
 <template>
   <div class="product-card">
-    <!-- Badge de Descuento si existe -->
     <span v-if="libro.descuento" class="product-badge-discount">
       -{{ libro.descuento }}%
     </span>
 
-    <!-- Imagen de la prenda -->
     <div class="product-image-container">
-      <img :src="obtenerImagen(libro.imagen)" :alt="libro.titulo" />
+      <img :src="obtenerImagen(libro.imagen)" :alt="tituloProducto" />
     </div>
 
-    <!-- Info del producto -->
     <div class="product-info">
-      <span class="product-category">{{ libro.genero }}</span>
-      <h3 class="product-title">{{ libro.titulo }}</h3>
+      <span class="product-category">{{ generoProducto }}</span>
+      <h3 class="product-title">{{ tituloProducto }}</h3>
       
       <div class="product-price-box">
         <span v-if="libro.precioAnterior" class="product-price-old">
           $U {{ libro.precioAnterior }}
         </span>
         <span class="product-price-current">
-          $U {{ libro.precio_uyu }}
+          $U {{ Number(precioProducto).toLocaleString('es-UY') }}
         </span>
       </div>
 
-      <!-- Acciones sencillas -->
       <div class="product-actions">
-        <router-link :to="'/libro/' + libro.isbn" class="btn-detalles">
+        <!-- Navega hacia la ruta con ID dinámico -->
+        <router-link :to="'/libro/' + idProducto" class="btn-detalles">
           Ver detalle →
         </router-link>
 
