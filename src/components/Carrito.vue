@@ -1,12 +1,19 @@
 <script setup>
+
 import { useCarritoStore } from '@/stores/carritoStore';
 import { useRouter } from 'vue-router';
 
+// ¡Esta línea es la que faltaba o estaba mal nombrada!
 const carritoStore = useCarritoStore();
 const router = useRouter();
 
-const irAInicio = () => {
-  router.push('/inicio');
+const finalizarCompra = () => {
+  if (!carritoStore.estaAutenticado()) {
+    alert('Debes iniciar sesión para finalizar tu compra mayorista.');
+   router.push('/');
+  } else {
+    alert('¡Procesando pedido mayorista!');
+  }
 };
 </script>
 
@@ -14,18 +21,12 @@ const irAInicio = () => {
   <div class="carrito-container">
     <h2>Tu Carrito de Compras</h2>
 
-    <!-- Si no inició sesión -->
-    <div v-if="!carritoStore.estaAutenticado()" class="alerta-sesion">
-      <p>Debes iniciar sesión para ver y gestionar tu carrito.</p>
-      <button @click="irAInicio" class="btn-login">Ir a Iniciar Sesión</button>
-    </div>
-
-    <!-- Si inició sesión pero el carrito está vacío -->
-    <div v-else-if="carritoStore.items.length === 0" class="carrito-vacio">
+    <!-- Si el carrito está vacío -->
+    <div v-if="carritoStore.items.length === 0" class="carrito-vacio">
       <p>Tu carrito está vacío.</p>
     </div>
 
-    <!-- Lista de prendas agregadas -->
+    <!-- Lista de prendas agregadas (Permite verlas sin estar logueado) -->
     <div v-else class="contenido-carrito">
       <ul class="lista-items">
         <li 
@@ -39,7 +40,6 @@ const irAInicio = () => {
               Marca/Autor: <strong>{{ item.autor || item.marca }}</strong>
             </p>
             <p>Cantidad: <strong>{{ item.cantidad }}</strong></p>
-            <!-- LÍNEA NUEVA: Muestra el precio unitario formateado -->
             <p>Precio unitario: <strong>${{ Number(item.precio || 0).toLocaleString('es-UY') }}</strong></p>
           </div>
 
@@ -53,9 +53,8 @@ const irAInicio = () => {
       </ul>
 
       <div class="resumen">
-        <!-- LÍNEA MODIFICADA: Total con formato de moneda -->
         <h3>Total: ${{ Number(carritoStore.total || 0).toLocaleString('es-UY') }}</h3>
-        <button class="btn-comprar">Finalizar Compra</button>
+        <button @click="finalizarCompra" class="btn-comprar">Finalizar Compra</button>
       </div>
     </div>
   </div>
@@ -75,7 +74,7 @@ h2 {
   margin-bottom: 20px;
 }
 
-.alerta-sesion, .carrito-vacio {
+.carrito-vacio {
   text-align: center;
   padding: 40px;
   background-color: #f8fafc;
@@ -121,7 +120,7 @@ h2 {
   margin-top: 20px;
 }
 
-.btn-login, .btn-comprar {
+.btn-comprar {
   background-color: #b84141;
   color: white;
   border: none;

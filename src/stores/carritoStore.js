@@ -11,7 +11,7 @@ export const useCarritoStore = defineStore('carrito', () => {
     localStorage.setItem('prendas_carrito', JSON.stringify(items.value));
   };
 
-  // Verificar autenticación estricta
+  // Verificar autenticación estricta (Mantenida por si la usás en otras vistas o futuro checkout)
   const estaAutenticado = () => {
     const usuario = localStorage.getItem('usuario_activo');
     
@@ -28,12 +28,8 @@ export const useCarritoStore = defineStore('carrito', () => {
   };
 
   const agregarAlCarrito = (prenda) => {
-    if (!estaAutenticado()) {
-      return { 
-        exito: false, 
-        mensaje: 'Debes iniciar sesión para agregar prendas al carrito.' 
-      };
-    }
+    // Nota: Quitamos el bloque de `if (!estaAutenticado())` para permitir 
+    // que el usuario agregue prendas al carrito de forma anónima.
 
     // Busca por isbn o por id
     const idPrenda = prenda.isbn || prenda.id;
