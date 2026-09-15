@@ -10,7 +10,9 @@ const textoBuscado = ref('');
 // Cargar productos desde la API de Laravel al montar el componente
 onMounted(async () => {
   try {
-    productos.value = await apiFetch('/productos');
+    const res = await apiFetch('/productos', { requerirAuth: false });
+    console.log('--- RESPUESTA API ---', res);
+    productos.value = res;
   } catch (error) {
     console.error('Error al cargar productos:', error.message);
   }

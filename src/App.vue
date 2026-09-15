@@ -1,13 +1,17 @@
 <script setup>
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import { RouterView, useRouter, useRoute } from 'vue-router';
 import { useCarritoStore } from '@/stores/carritoStore';
-import { useLibrosStore } from '@/stores/librosstore'; // Importamos el store de libros
+import { useLibrosStore } from '@/stores/librosstore';
 
 const router = useRouter();
 const route = useRoute();
 const carritoStore = useCarritoStore();
-const librosStore = useLibrosStore(); // Instanciamos el store
+const librosStore = useLibrosStore();
+
+// Leemos el usuario activo desde el localStorage que usa Inicio.vue
+const usuarioActivo = ref(JSON.parse(localStorage.getItem('usuario_activo')) || null);
+const mostrarMenuCuenta = ref(false);
 
 const pestañaActual = computed(() => {
   if (route.path === '/listado') return 'catalogo';
@@ -15,16 +19,26 @@ const pestañaActual = computed(() => {
   return 'inicio';
 });
 
-const navegarAInicio = () => {
+const navegarAInicio = () => { router.push('/'); };
+const navegarACatalogo = () => { router.push('/listado'); };
+const navegarACarrito = () => { router.push('/carrito'); };
+
+// Comportamiento del botón superior derecho
+const manejarAccionCuenta = () => {
+  if (usuarioActivo.value) {
+    // Si hay sesión, despliega el menú de configuración/cuenta
+    mostrarMenuCuenta.value = !mostrarMenuCuenta.value;
+  } else {
+    // Si no hay sesión, va a la pantalla de inicio (login/registro)
+    router.push('/');
+  }
+};
+
+const cerrarSesion = () => {
+  localStorage.removeItem('usuario_activo');
+  usuarioActivo.value = null;
+  mostrarMenuCuenta.value = false;
   router.push('/');
-};
-
-const navegarACatalogo = () => {
-  router.push('/listado');
-};
-
-const navegarACarrito = () => {
-  router.push('/carrito');
 };
 </script>
 
@@ -37,7 +51,6 @@ const navegarACarrito = () => {
       </div>
 
       <div class="search-bar-container">
-        <!-- v-model conectado directamente a la variable global del store -->
         <input 
           type="text" 
           v-model="librosStore.textoBuscado" 
@@ -45,10 +58,23 @@ const navegarACarrito = () => {
         />
       </div>
 
-      <div class="header-actions">
-        <button class="action-btn">
-          <span>👤</span> Cuenta
+      <div class="header-actions cuenta-container">
+        <!-- Botón Dinámico: Muestra el nombre si está logueado, o "Cuenta" si no -->
+        <button class="action-btn" @click="manejarAccionCuenta">
+          <span>👤</span> 
+          {{ usuarioActivo ? usuarioActivo.nombre : 'Cuenta' }}
         </button>
+
+        <!-- Menú desplegable de configuraciones (Cerrar Sesión) -->
+        <div v-if="usuarioActivo && mostrarMenuCuenta" class="dropdown-cuenta">
+          <div class="dropdown-header">
+            <p>Conectado como:<br/><strong>{{ usuarioActivo.email }}</strong></p>
+          </div>
+          <hr />
+          <button @click="cerrarSesion" class="dropdown-item btn-salir">
+            🚪 Cerrar Sesión
+          </button>
+        </div>
       </div>
     </header>
 
@@ -70,20 +96,16 @@ const navegarACarrito = () => {
       </div>
 
       <div class="cart-shortcut" @click="navegarACarrito">
-  <span>🛒</span>
-  <!-- Formateamos el total dinámico desde el store de Pinia -->
-  <span class="cart-total">
-    ${{ Number(carritoStore.total || 0).toLocaleString('es-UY', { minimumFractionDigits: 2 }) }}
-  </span>
-  <span v-if="carritoStore.cantidadTotalItems > 0" class="badge-carrito">
-    {{ carritoStore.cantidadTotalItems }}
-  </span>
-</div>
-
-
+        <span>🛒</span>
+        <span class="cart-total">
+          ${{ Number(carritoStore.total || 0).toLocaleString('es-UY', { minimumFractionDigits: 2 }) }}
+        </span>
+        <span v-if="carritoStore.cantidadTotalItems > 0" class="badge-carrito">
+          {{ carritoStore.cantidadTotalItems }}
+        </span>
+      </div>
     </nav>
 
-    <!-- Contenido dinámico -->
     <main class="content">
       <RouterView />
     </main>
@@ -143,7 +165,11 @@ const navegarACarrito = () => {
   gap: 20px;
 }
 
-/* 1. Botón Cuenta con borde */
+/* Contenedor y Menú Desplegable de Cuenta */
+.cuenta-container {
+  position: relative;
+}
+
 .action-btn {
   background: none;
   border: 1px solid rgba(255, 255, 255, 0.25);
@@ -163,6 +189,51 @@ const navegarACarrito = () => {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
+.dropdown-cuenta {
+  position: absolute;
+  right: 0;
+  top: 48px;
+  background: #ffffff;
+  border-radius: 6px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  width: 220px;
+  z-index: 100;
+  padding: 12px;
+  color: #333333;
+}
+
+.dropdown-header {
+  padding: 4px 6px;
+  font-size: 0.85rem;
+  line-height: 1.3;
+}
+
+.dropdown-cuenta hr {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  margin: 8px 0;
+}
+
+.dropdown-item {
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.btn-salir {
+  color: #b53838;
+}
+
+.btn-salir:hover {
+  background-color: #fdf2f2;
+}
+
 /* Barra Oscura de Navegación */
 .main-navbar {
   background-color: #3c4a57;
@@ -179,14 +250,12 @@ const navegarACarrito = () => {
   gap: 8px;
 }
 
-/* 2. Botones de Navegación con borde */
 .nav-links button {
   background: none;
   border: 1px solid transparent;
   border-radius: 6px;
   color: #cccccc;
   font-size: 1.1rem;
-  
   font-weight: 500;
   padding: 6px 12px;
   cursor: pointer;
@@ -206,7 +275,6 @@ const navegarACarrito = () => {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-/* 3. Acceso rápido al Carrito con borde */
 .cart-shortcut {
   display: flex;
   align-items: center;

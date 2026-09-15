@@ -15,14 +15,11 @@ const routes = [
   { path: '/', name: 'inicio', component: InicioView },
   { path: '/listado', name: 'listado', component: ListadoView },
   { path: '/genero/:nombreGenero', name: 'genero', component: GeneroView },
-  // Ajuste clave: de :isbn a :id para conectar con Laravel
   { path: '/libro/:id', name: 'libro', component: PrendaView },
   { path: '/carrito', name: 'carrito', component: CarritoView },
   
-  // Ruta secreta de acceso directo
   { path: RUTA_SECRET_MAYORISTA, name: 'mayorista-secreto', component: MayoristaAuth },
   
-  // Rutas estándar de mayorista
   { path: '/mayorista/acceso', name: 'mayorista-acceso', component: MayoristaAuth },
   {
     path: '/mayorista/panel',
@@ -52,7 +49,10 @@ router.beforeEach((to, from, next) => {
       return next('/')
     }
 
-    if (to.meta.requiereMayorista && !mayoristaStore.estaAutenticado()) {
+    // Leemos la presencia del token directamente en localStorage para evitar desincronizaciones con Pinia
+    const tieneToken = !!localStorage.getItem('token')
+
+    if (to.meta.requiereMayorista && !tieneToken && !mayoristaStore.estaAutenticado()) {
       return next('/mayorista/acceso')
     }
   }

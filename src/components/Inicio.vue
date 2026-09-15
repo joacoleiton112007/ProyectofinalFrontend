@@ -43,6 +43,7 @@ const handleSubmit = () => {
 
     if (usuarioEncontrado) {
       localStorage.setItem('usuario_activo', JSON.stringify(usuarioEncontrado));
+      window.dispatchEvent(new Event('storage')); // <-- AGREGA ESTA LÍNEA AQUÍ
       router.push('/listado');
     } else {
       mensajeError.value = 'Correo o contraseña incorrectos, o el usuario no existe.';

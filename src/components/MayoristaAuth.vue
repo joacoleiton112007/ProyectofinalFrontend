@@ -1,57 +1,139 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useMayoristaStore } from '@/stores/mayoristaStore'
 
 const router = useRouter()
-const mayoristaStore = useMayoristaStore()
 
 const modoLogin = ref(true)
+const esperandoCodigo = ref(false) // Estado para el paso del código (Login o Registro)
+
 const errorMensaje = ref('')
 const exitoMensaje = ref('')
 
+// Campos Login
 const loginEmail = ref('')
 const loginPassword = ref('')
 
-const regRazonSocial = ref('')
-const regRut = ref('')
+// Campos Registro
+const regNombre = ref('')
+const regApellido = ref('')
 const regEmail = ref('')
 const regPassword = ref('')
 
-const manejarLogin = () => {
-  errorMensaje.value = ''
-  const res = mayoristaStore.loginMayorista(loginEmail.value, loginPassword.value)
-  
-  if (res.exito) {
-    router.push('/mayorista/panel')
-  } else {
-    errorMensaje.value = res.mensaje
-  }
-}
+// Campo Código Verificación
+const codigoVerificacion = ref('')
 
-const manejarRegistro = () => {
+const manejarLogin = async () => {
   errorMensaje.value = ''
   exitoMensaje.value = ''
 
-  if (!regRazonSocial.value || !regRut.value || !regEmail.value || !regPassword.value) {
+  try {
+    const res = await fetch('http://127.0.0.1:8000/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: loginEmail.value,
+        password: loginPassword.value
+      })
+    })
+
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.mensaje || 'Error al iniciar sesión')
+
+    // Si el backend pide verificación por código en el login
+    if (data.requiere_codigo) {
+      esperandoCodigo.value = true
+      exitoMensaje.value = 'Código enviado a tu correo. Por favor ingresalo a continuación.'
+      return
+    }
+
+    // Si devuelve el token directo (fallback por si acaso)
+    localStorage.setItem('token', data.token)
+    localStorage.setItem('usuario_activo', JSON.stringify(data.usuario))
+    localStorage.setItem('mayorista_desbloqueado', 'true')
+    window.dispatchEvent(new Event('storage'))
+
+    router.push('/mayorista/panel')
+  } catch (err) {
+    errorMensaje.value = err.message
+  }
+}
+
+const manejarRegistro = async () => {
+  errorMensaje.value = ''
+  exitoMensaje.value = ''
+
+  if (!regNombre.value || !regApellido.value || !regEmail.value || !regPassword.value) {
     errorMensaje.value = 'Completa todos los campos obligatorios.'
     return
   }
 
-  const res = mayoristaStore.registrarMayorista({
-    razonSocial: regRazonSocial.value,
-    rut: regRut.value,
-    email: regEmail.value,
-    password: regPassword.value
-  })
+  try {
+    const res = await fetch('http://127.0.0.1:8000/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nombre: regNombre.value,
+        apellido: regApellido.value,
+        email: regEmail.value,
+        password: regPassword.value
+      })
+    })
 
-  if (res.exito) {
-    exitoMensaje.value = res.mensaje
-    modoLogin.value = true
-    regPassword.value = ''
-  } else {
-    errorMensaje.value = res.mensaje
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.mensaje || 'Error al registrar usuario')
+
+    // Avanzar al paso del código
+    esperandoCodigo.value = true
+    exitoMensaje.value = 'Código enviado a tu correo. Por favor ingresalo a continuación.'
+  } catch (err) {
+    errorMensaje.value = err.message
   }
+}
+
+const manejarVerificacionCodigo = async () => {
+  errorMensaje.value = ''
+  exitoMensaje.value = ''
+
+  if (!codigoVerificacion.value) {
+    errorMensaje.value = 'Por favor ingresa el código de 6 dígitos.'
+    return
+  }
+
+  // Identifica el email según si vino de Login o Registro
+  const emailAEnviar = modoLogin.value ? loginEmail.value : regEmail.value
+
+  try {
+    const res = await fetch('http://127.0.0.1:8000/api/verificar-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: emailAEnviar,
+        codigo: codigoVerificacion.value
+      })
+    })
+
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.mensaje || 'Código inválido o expirado')
+
+    // Al verificar correctamente, guardamos las credenciales y redirigimos al panel
+    localStorage.setItem('token', data.token)
+    localStorage.setItem('usuario_activo', JSON.stringify(data.usuario))
+    localStorage.setItem('mayorista_desbloqueado', 'true')
+    window.dispatchEvent(new Event('storage'))
+
+    esperandoCodigo.value = false
+    router.push('/mayorista/panel')
+  } catch (err) {
+    errorMensaje.value = err.message
+  }
+}
+
+const cambiarModo = (esLogin) => {
+  modoLogin.value = esLogin
+  esperandoCodigo.value = false
+  errorMensaje.value = ''
+  exitoMensaje.value = ''
 }
 </script>
 
@@ -64,14 +146,15 @@ const manejarRegistro = () => {
       </div>
 
       <div class="selector-tabs">
-        <button :class="{ activo: modoLogin }" @click="modoLogin = true">Ingresar</button>
-        <button :class="{ activo: !modoLogin }" @click="modoLogin = false">Registrarse</button>
+        <button :class="{ activo: modoLogin }" @click="cambiarModo(true)">Ingresar</button>
+        <button :class="{ activo: !modoLogin }" @click="cambiarModo(false)">Registrarse</button>
       </div>
 
       <p v-if="errorMensaje" class="mensaje error">{{ errorMensaje }}</p>
       <p v-if="exitoMensaje" class="mensaje exito">{{ exitoMensaje }}</p>
 
-      <form v-if="modoLogin" @submit.prevent="manejarLogin" class="formulario">
+      <!-- FORMULARIO LOGIN (PASO 1) -->
+      <form v-if="modoLogin && !esperandoCodigo" @submit.prevent="manejarLogin" class="formulario">
         <div class="campo">
           <label>Correo Electrónico</label>
           <input type="email" v-model="loginEmail" required placeholder="empresa@correo.com" />
@@ -83,14 +166,15 @@ const manejarRegistro = () => {
         <button type="submit" class="btn-submit">Ingresar al Portal</button>
       </form>
 
-      <form v-else @submit.prevent="manejarRegistro" class="formulario">
+      <!-- FORMULARIO REGISTRO (PASO 1: DATOS) -->
+      <form v-else-if="!modoLogin && !esperandoCodigo" @submit.prevent="manejarRegistro" class="formulario">
         <div class="campo">
-          <label>Nombre Comercial</label>
-          <input type="text" v-model="regRazonSocial" required placeholder="Distribuidora S.A." />
+          <label>Nombre</label>
+          <input type="text" v-model="regNombre" required placeholder="Juan" />
         </div>
         <div class="campo">
           <label>Apellido</label>
-          <input type="text" v-model="regRut" required placeholder="Apellido" />
+          <input type="text" v-model="regApellido" required placeholder="Pérez" />
         </div>
         <div class="campo">
           <label>Correo Electrónico</label>
@@ -98,9 +182,28 @@ const manejarRegistro = () => {
         </div>
         <div class="campo">
           <label>Contraseña</label>
-          <input type="password" v-model="regPassword" required />
+          <input type="password" v-model="regPassword" required minlength="8" />
         </div>
-        <button type="submit" class="btn-submit">Crear Cuenta Mayorista</button>
+        <button type="submit" class="btn-submit">Enviar Código de Verificación</button>
+      </form>
+
+      <!-- FORMULARIO VERIFICACIÓN (PASO 2: CÓDIGO VERIFICACIÓN TANTO PARA LOGIN COMO REGISTRO) -->
+      <form v-else @submit.prevent="manejarVerificacionCodigo" class="formulario">
+        <div class="campo">
+          <label>Código de Verificación (6 dígitos)</label>
+          <input 
+            type="text" 
+            v-model="codigoVerificacion" 
+            required 
+            maxlength="6" 
+            placeholder="123456" 
+            class="input-codigo"
+          />
+        </div>
+        <button type="submit" class="btn-submit">Verificar y Continuar</button>
+        <button type="button" class="btn-secundario" @click="esperandoCodigo = false">
+          ← Volver atrás
+        </button>
       </form>
     </div>
   </div>
@@ -113,7 +216,6 @@ const manejarRegistro = () => {
   justify-content: center;
   align-items: center;
   background-color: #d9d0c9;
-  
 }
 
 .auth-card {
@@ -128,7 +230,6 @@ const manejarRegistro = () => {
 .encabezado {
   text-align: center;
   margin-bottom: 20px;
-  
 }
 
 .encabezado h2 {
@@ -184,6 +285,13 @@ const manejarRegistro = () => {
   border-radius: 6px;
 }
 
+.input-codigo {
+  text-align: center;
+  font-size: 1.4rem;
+  letter-spacing: 4px;
+  font-weight: bold;
+}
+
 .btn-submit {
   width: 100%;
   padding: 12px;
@@ -194,6 +302,17 @@ const manejarRegistro = () => {
   font-weight: bold;
   cursor: pointer;
   margin-top: 10px;
+}
+
+.btn-secundario {
+  width: 100%;
+  padding: 8px;
+  background: transparent;
+  color: #64748b;
+  border: none;
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin-top: 5px;
 }
 
 .mensaje {
