@@ -6,24 +6,60 @@ import { useCarritoStore } from '@/stores/carritoStore';
 const props = defineProps({
   libro: {
     type: Object,
-    required: true
+    required: true,
+    default: () => ({})
   }
 });
 
 const router = useRouter();
 const carritoStore = useCarritoStore();
 
-// Carga dinámica de imágenes locales
-const imagenes = import.meta.glob('../assets/images/*', { eager: true, import: 'default' });
+// Cargar mapa de assets de Vite (IMPRESCINDIBLE)
+const imagenesAssets = import.meta.glob('@/assets/images/*.{png,jpg,jpeg,svg,webp}', { eager: true, import: 'default' });
 
 const obtenerImagen = (nombreArchivo) => {
-  if (!nombreArchivo) return 'https://via.placeholder.com/200';
-  
-  const claveEncontrada = Object.keys(imagenes).find(key => key.toLowerCase().endsWith(nombreArchivo.toLowerCase()));
-  return claveEncontrada ? imagenes[claveEncontrada] : 'https://via.placeholder.com/200';
+  if (!nombreArchivo || typeof nombreArchivo !== 'string') {
+    return 'https://placehold.co/300x300?text=Sin+Imagen';
+  }
+
+  const archivoClean = nombreArchivo.trim();
+
+  // 1. Si viene con URL completa
+  if (archivoClean.startsWith('http://') || archivoClean.startsWith('https://')) {
+    return archivoClean;
+  }
+
+  // 2. BUSCAR PRIMERO EN ASSETS LOCALES DE VUE (src/assets/images)
+  // Limpiamos prefijos de ruta para buscar la coincidencia directa
+  const nombreSolo = archivoClean.replace(/^productos\//, '');
+
+  const claveEncontrada = Object.keys(imagenesAssets).find(key => {
+    const nombreEnRuta = key.split('/').pop();
+    return nombreEnRuta.toLowerCase() === nombreSolo.toLowerCase();
+  });
+
+  if (claveEncontrada) {
+    return imagenesAssets[claveEncontrada];
+  }
+
+  // 3. Si es una ruta explícita que ya apunta a storage o images de Laravel
+  if (archivoClean.startsWith('/storage/') || archivoClean.startsWith('/images/')) {
+    return `http://127.0.0.1:8000${archivoClean}`;
+  }
+
+  // 4. Si es subida desde la PC a Laravel (Storage)
+  if (archivoClean.includes('_') || archivoClean.includes('productos/')) {
+    const pathLimpio = archivoClean.replace(/^productos\//, '');
+    return `http://127.0.0.1:8000/storage/productos/${pathLimpio}`;
+  }
+
+  // 5. Caso por defecto: carpeta public/images de Laravel
+  return `http://127.0.0.1:8000/images/${archivoClean}`;
 };
 
 const agregarAlCarrito = () => {
+  if (!props.libro) return;
+
   const prendaConPrecio = {
     ...props.libro,
     precio: props.libro.precio || props.libro.precio_uyu || 0
@@ -31,29 +67,28 @@ const agregarAlCarrito = () => {
 
   const resultado = carritoStore.agregarAlCarrito(prendaConPrecio);
 
-  if (!resultado.exito) {
-    alert(resultado.mensaje);
+  if (!resultado?.exito) {
+    alert(resultado?.mensaje || 'Error al agregar al carrito');
     router.push('/inicio');
   } else {
     alert('Prenda agregada al carrito con éxito');
   }
 };
 
-// Mapeo seguro de propiedades (Laravel API vs modelo legacy)
-const tituloProducto = computed(() => props.libro.nombre || props.libro.titulo || '');
-const generoProducto = computed(() => props.libro.categoria?.nombre || props.libro.genero || '');
-const precioProducto = computed(() => props.libro.precio ?? props.libro.precio_uyu ?? 0);
-const idProducto = computed(() => props.libro.id || props.libro.isbn);
+const tituloProducto = computed(() => props.libro?.nombre || props.libro?.titulo || '');
+const generoProducto = computed(() => props.libro?.categoria?.nombre || props.libro?.genero || '');
+const precioProducto = computed(() => props.libro?.precio ?? props.libro?.precio_uyu ?? 0);
+const idProducto = computed(() => props.libro?.id || props.libro?.isbn);
 </script>
 
 <template>
-  <div class="product-card">
-    <span v-if="libro.descuento" class="product-badge-discount">
+  <div class="product-card" v-if="libro">
+    <span v-if="libro?.descuento" class="product-badge-discount">
       -{{ libro.descuento }}%
     </span>
 
     <div class="product-image-container">
-      <img :src="obtenerImagen(libro.imagen)" :alt="tituloProducto" />
+      <img :src="obtenerImagen(libro?.imagen)" :alt="tituloProducto" />
     </div>
 
     <div class="product-info">
@@ -61,7 +96,7 @@ const idProducto = computed(() => props.libro.id || props.libro.isbn);
       <h3 class="product-title">{{ tituloProducto }}</h3>
       
       <div class="product-price-box">
-        <span v-if="libro.precioAnterior" class="product-price-old">
+        <span v-if="libro?.precioAnterior" class="product-price-old">
           $U {{ libro.precioAnterior }}
         </span>
         <span class="product-price-current">
@@ -70,7 +105,6 @@ const idProducto = computed(() => props.libro.id || props.libro.isbn);
       </div>
 
       <div class="product-actions">
-        <!-- Navega hacia la ruta con ID dinámico -->
         <router-link :to="'/libro/' + idProducto" class="btn-detalles">
           Ver detalle →
         </router-link>
