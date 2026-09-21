@@ -1,31 +1,19 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { apiFetch } from '@/services/api.js';
+import { ref, onMounted } from 'vue'
+import { apiFetch } from '@/services/api.js'
 
-const productos = ref([]);
-const categorias = ref([]);
-const cargando = ref(false);
+const productos = ref([])
+const categorias = ref([])
+const cargando = ref(false)
 
-// Control para alternar entre imagen local o archivo subido
-const origenImagen = ref('lista'); // 'lista' o 'archivo'
-const archivoSeleccionado = ref(null);
+const origenImagen = ref('lista')
+const archivoSeleccionado = ref(null)
 
-// Imágenes predefinidas disponibles en el catálogo
 const imagenesDisponibles = [
-  'Camisa.png',
-  'Musculosa.png',
-  'MangaLarga.png',
-  'Short.png',
-  'Pántalon.png',
-  'Vestido.png',
-  'Zapatilla.png',
-  'Zapatos.png',
-  'Saco.png',
-  'Medias.png',
-  'Falda.png',
-  'Prendas_1.png',
-  'Prendas_2.png'
-];
+  'Camisa.png', 'Musculosa.png', 'MangaLarga.png', 'Short.png',
+  'Pántalon.png', 'Vestido.png', 'Zapatilla.png', 'Zapatos.png',
+  'Saco.png', 'Medias.png', 'Falda.png', 'Prendas_1.png', 'Prendas_2.png'
+]
 
 const nuevoProducto = ref({
   nombre: '',
@@ -33,94 +21,88 @@ const nuevoProducto = ref({
   categoria_id: null,
   descripcion: '',
   imagen: 'Camisa.png'
-});
+})
 
-// Cargar productos y categorías desde la API
 const cargarDatos = async () => {
-  cargando.value = true;
+  cargando.value = true
   try {
     const [resProds, resCats] = await Promise.all([
       apiFetch('/productos', { requerirAuth: false }),
       apiFetch('/categorias', { requerirAuth: false })
-    ]);
-    productos.value = resProds;
-    categorias.value = resCats;
+    ])
+    productos.value = resProds || []
+    categorias.value = resCats || []
 
     if (categorias.value.length > 0) {
-      nuevoProducto.value.categoria_id = categorias.value[0].id;
+      nuevoProducto.value.categoria_id = categorias.value[0].id
     }
   } catch (error) {
-    console.error('Error al cargar datos:', error);
+    console.error('Error al cargar datos:', error)
   } finally {
-    cargando.value = false;
+    cargando.value = false
   }
-};
+}
 
 const manejarArchivo = (e) => {
-  archivoSeleccionado.value = e.target.files[0] || null;
-};
+  archivoSeleccionado.value = e.target.files[0] || null
+}
 
-// 1. AGREGAR PRODUCTO A LA BD (Soporta lista o archivo subido)
 const agregarProducto = async () => {
-  if (!nuevoProducto.value.nombre || nuevoProducto.value.precio <= 0 || !nuevoProducto.value.categoria_id) return;
+  if (!nuevoProducto.value.nombre || nuevoProducto.value.precio <= 0 || !nuevoProducto.value.categoria_id) return
 
   try {
-    let res;
+    let res
 
-    // Si seleccionó subir un archivo físico de la PC
     if (origenImagen.value === 'archivo' && archivoSeleccionado.value) {
-      const formData = new FormData();
-      formData.append('nombre', nuevoProducto.value.nombre);
-      formData.append('precio', nuevoProducto.value.precio);
-      formData.append('categoria_id', nuevoProducto.value.categoria_id);
-      formData.append('descripcion', nuevoProducto.value.descripcion || `Pack de ${nuevoProducto.value.nombre}`);
-      formData.append('imagen_file', archivoSeleccionado.value);
+      const formData = new FormData()
+      formData.append('nombre', nuevoProducto.value.nombre)
+      formData.append('precio', nuevoProducto.value.precio)
+      formData.append('categoria_id', nuevoProducto.value.categoria_id)
+      formData.append('descripcion', nuevoProducto.value.descripcion || `Pack de ${nuevoProducto.value.nombre}`)
+      formData.append('imagen_file', archivoSeleccionado.value)
 
-      const token = localStorage.getItem('token');
-      const headers = {};
-      if (token) headers.Authorization = `Bearer ${token}`;
+      const token = localStorage.getItem('token')
+      const headers = {}
+      if (token) headers.Authorization = `Bearer ${token}`
 
       const resRaw = await fetch('http://127.0.0.1:8000/api/productos', {
         method: 'POST',
         headers,
         body: formData
-      });
+      })
 
-      res = await resRaw.json();
-    } 
-    // Si seleccionó de la lista desplegable (Enviamos JSON limpio vía apiFetch)
-    else {
+      res = await resRaw.json()
+    } else {
       const payload = {
         nombre: nuevoProducto.value.nombre,
         precio: nuevoProducto.value.precio,
         categoria_id: nuevoProducto.value.categoria_id,
         descripcion: nuevoProducto.value.descripcion || `Pack de ${nuevoProducto.value.nombre}`,
         imagen: nuevoProducto.value.imagen || 'Camisa.png'
-      };
+      }
 
       res = await apiFetch('/productos', {
         method: 'POST',
         body: JSON.stringify(payload)
-      });
+      })
     }
 
     if (res && res.producto) {
-      productos.value.push(res.producto);
+      productos.value.push(res.producto)
       nuevoProducto.value = {
         nombre: '',
         precio: 0,
         categoria_id: categorias.value[0]?.id || null,
         descripcion: '',
         imagen: 'Camisa.png'
-      };
-      archivoSeleccionado.value = null;
+      }
+      archivoSeleccionado.value = null
     }
   } catch (error) {
-    console.error('Error al agregar producto:', error);
+    console.error('Error al agregar producto:', error)
   }
-};
+}
 
-// 2. DUPLICAR PRODUCTO EN LA BD
 const duplicarProducto = async (prod) => {
   try {
     const clon = {
@@ -129,78 +111,83 @@ const duplicarProducto = async (prod) => {
       categoria_id: prod.categoria_id,
       descripcion: prod.descripcion,
       imagen: prod.imagen
-    };
+    }
 
     const res = await apiFetch('/productos', {
       method: 'POST',
       body: JSON.stringify(clon)
-    });
+    })
 
-    if (res.producto) {
-      productos.value.push(res.producto);
+    if (res && res.producto) {
+      productos.value.push(res.producto)
     }
   } catch (error) {
-    console.error('Error al duplicar producto:', error);
+    console.error('Error al duplicar producto:', error)
   }
-};
+}
 
-// 3. BORRAR PRODUCTO DE LA BD
 const eliminarProducto = async (id) => {
-  if (!confirm('¿Seguro que querés eliminar este producto?')) return;
+  if (!confirm('¿Seguro que querés eliminar este producto?')) return
 
   try {
-    await apiFetch(`/productos/${id}`, {
-      method: 'DELETE'
-    });
-    productos.value = productos.value.filter(p => p.id !== id);
+    await apiFetch(`/productos/${id}`, { method: 'DELETE' })
+    productos.value = productos.value.filter(p => p.id !== id)
   } catch (error) {
-    console.error('Error al eliminar producto:', error);
+    console.error('Error al eliminar producto:', error)
   }
-};
+}
 
 onMounted(() => {
-  cargarDatos();
-});
+  cargarDatos()
+})
 </script>
 
 <template>
   <div class="panel-container">
-    <h2>Panel de Control Mayorista</h2>
+    <div class="encabezado-panel">
+      <h2>Gestión de Inventario</h2>
+      <p>Administrá el catálogo de productos y precios asignados al canal mayorista.</p>
+    </div>
 
-    <!-- Formulario Agregar -->
-    <section class="form-seccion">
+    <!-- FORMULARIO DE AGREGAR PRODUCTO -->
+    <section class="tarjeta-panel">
       <h3>Agregar Nuevo Producto al Catálogo</h3>
-      <form @submit.prevent="agregarProducto" class="form-stack">
+      <form @submit.prevent="agregarProducto">
         <div class="form-grid">
-          <input 
-            v-model="nuevoProducto.nombre" 
-            type="text" 
-            placeholder="Nombre de la prenda/pack" 
-            required 
-          />
-          
-          <input 
-            v-model.number="nuevoProducto.precio" 
-            type="number" 
-            placeholder="Precio UYU ($)" 
-            required 
-          />
-          
-          <select v-model="nuevoProducto.categoria_id" required>
-            <option v-for="cat in categorias" :key="cat.id" :value="cat.id">
-              {{ cat.nombre }}
-            </option>
-          </select>
+          <div class="grupo-campo">
+            <label>Nombre del Producto / Pack</label>
+            <input 
+              v-model="nuevoProducto.nombre" 
+              type="text" 
+              placeholder="Ej: Camisa Lino Lote x10" 
+              required 
+            />
+          </div>
 
-          <!-- Toggle de tipo de imagen -->
-          <div class="control-imagen">
-            <div class="radio-group">
-              <label>
-                <input type="radio" v-model="origenImagen" value="lista" /> Lista
-              </label>
-              <label>
-                <input type="radio" v-model="origenImagen" value="archivo" /> Archivo
-              </label>
+          <div class="grupo-campo">
+            <label>Precio Mayorista ($U)</label>
+            <input 
+              v-model.number="nuevoProducto.precio" 
+              type="number" 
+              placeholder="0" 
+              required 
+            />
+          </div>
+
+          <div class="grupo-campo">
+            <label>Categoría</label>
+            <select v-model="nuevoProducto.categoria_id" required>
+              <option v-for="cat in categorias" :key="cat.id" :value="cat.id">
+                {{ cat.nombre }}
+              </option>
+            </select>
+          </div>
+
+          <div class="grupo-campo control-imagen">
+            <label>Imagen</label>
+            <div class="radio-selector">
+              <label><input type="radio" v-model="origenImagen" value="lista" /> Catálogo</label>
+              <label><input type="radio" v-model="origenImagen" value="archivo" /> Subir archivo</label>
             </div>
 
             <select v-if="origenImagen === 'lista'" v-model="nuevoProducto.imagen" required>
@@ -211,25 +198,25 @@ onMounted(() => {
 
             <input v-else type="file" @change="manejarArchivo" accept="image/*" required class="input-file" />
           </div>
-
-          <button type="submit" class="btn-agregar">➕ Agregar</button>
         </div>
+
+        <button type="submit" class="btn-guardar">➕ Agregar Producto</button>
       </form>
     </section>
 
-    <!-- Tabla de Productos -->
-    <section class="tabla-seccion">
-      <h3>Inventario del Catálogo Cliente</h3>
-      
-      <div v-if="cargando" class="texto-vacio">Cargando inventario...</div>
+    <!-- TABLA DE INVENTARIO -->
+    <section class="tarjeta-panel">
+      <h3>Inventario Activo</h3>
 
-      <table v-else class="tabla-productos">
+      <div v-if="cargando" class="texto-cargando">Cargando catálogo mayorista...</div>
+
+      <table v-else class="tabla-custom">
         <thead>
           <tr>
             <th>Imagen</th>
             <th>Producto</th>
             <th>Categoría</th>
-            <th>Precio</th>
+            <th>Precio Unitario</th>
             <th class="texto-centro">Acciones</th>
           </tr>
         </thead>
@@ -238,20 +225,16 @@ onMounted(() => {
             <td>
               <span class="badge-imagen">{{ prod.imagen || 'Sin Imagen' }}</span>
             </td>
-            <td>{{ prod.nombre }}</td>
+            <td><strong>{{ prod.nombre }}</strong></td>
             <td>{{ prod.categoria?.nombre || '-' }}</td>
-            <td>$U {{ Number(prod.precio).toLocaleString() }}</td>
+            <td class="precio-destacado">$U {{ Number(prod.precio).toLocaleString() }}</td>
             <td class="acciones texto-centro">
-              <button @click="duplicarProducto(prod)" class="btn-duplicar">
-                📋 Duplicar
-              </button>
-              <button @click="eliminarProducto(prod.id)" class="btn-borrar">
-                🗑️ Borrar
-              </button>
+              <button @click="duplicarProducto(prod)" class="btn-accion btn-clonar">📋 Duplicar</button>
+              <button @click="eliminarProducto(prod.id)" class="btn-accion btn-eliminar">🗑️ Borrar</button>
             </td>
           </tr>
           <tr v-if="productos.length === 0">
-            <td colspan="5" class="texto-vacio">No hay productos en el inventario.</td>
+            <td colspan="5" class="texto-cargando">No hay productos registrados en el sistema.</td>
           </tr>
         </tbody>
       </table>
@@ -260,96 +243,145 @@ onMounted(() => {
 </template>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
 .panel-container {
-  max-width: 950px;
-  margin: 30px auto;
-  font-family: system-ui, -apple-system, sans-serif;
+  max-width: 1050px;
+  margin: 40px auto;
+  padding: 0 20px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-h2 {
-  font-size: 1.5rem;
-  color: #1e293b;
-  margin-bottom: 20px;
-}
-
-.form-seccion, .tabla-seccion {
-  background: #ffffff;
-  padding: 20px;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
+.encabezado-panel {
   margin-bottom: 25px;
 }
 
-.form-seccion h3, .tabla-seccion h3 {
-  font-size: 1.1rem;
-  color: #334155;
-  margin-bottom: 15px;
+.encabezado-panel h2 {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 2.2rem;
+  color: #0f172a;
+  margin: 0 0 6px 0;
+}
+
+.encabezado-panel p {
+  color: #64748b;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.tarjeta-panel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  margin-bottom: 30px;
+}
+
+.tarjeta-panel h3 {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 1.3rem;
+  color: #1e293b;
+  margin-top: 0;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #f1f5f9;
+  padding-bottom: 10px;
 }
 
 .form-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+  margin-bottom: 20px;
 }
 
-.form-grid input[type="text"],
-.form-grid input[type="number"],
-.form-grid select {
-  padding: 8px 12px;
+.grupo-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.grupo-campo label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.grupo-campo input,
+.grupo-campo select {
+  padding: 10px 12px;
   border: 1px solid #cbd5e1;
-  border-radius: 4px;
+  border-radius: 8px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 0.9rem;
-  flex: 1 1 150px;
+  outline: none;
+  transition: border-color 0.2s;
 }
 
-.control-imagen {
+.grupo-campo input:focus,
+.grupo-campo select:focus {
+  border-color: #b85141;
+}
+
+.radio-selector {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 2 1 250px;
+  gap: 12px;
+  font-size: 0.82rem;
+  color: #64748b;
+  margin-bottom: 4px;
 }
 
-.radio-group {
-  display: flex;
-  gap: 8px;
-  font-size: 0.85rem;
-  color: #475569;
-}
-
-.input-file {
-  font-size: 0.85rem;
-}
-
-.btn-agregar {
-  background-color: #3a7d8c;
+.btn-guardar {
+  background-color: #b85141;
   color: white;
   border: none;
-  padding: 9px 16px;
-  border-radius: 4px;
-  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: bold;
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.tabla-productos {
+.btn-guardar:hover {
+  background-color: #7e1b1b;
+}
+
+.tabla-custom {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
 }
 
-.tabla-productos th, .tabla-productos td {
+.tabla-custom th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 700;
   padding: 12px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.tabla-custom td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
 }
 
 .badge-imagen {
   background-color: #f1f5f9;
-  border: 1px solid #cbd5e1;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 0.8rem;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  padding: 3px 8px;
+  border-radius: 6px;
   font-family: monospace;
+  font-size: 0.8rem;
+}
+
+.precio-destacado {
+  font-weight: bold;
+  color: #0f172a;
 }
 
 .texto-centro {
@@ -362,41 +394,39 @@ h2 {
   gap: 8px;
 }
 
-.btn-duplicar {
-  background-color: #f1f5f9;
-  color: #334155;
-  border: 1px solid #cbd5e1;
+.btn-accion {
+  border: 1px solid transparent;
   padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 0.8rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
 }
 
-.btn-duplicar:hover {
+.btn-clonar {
+  background-color: #f1f5f9;
+  color: #334155;
+  border-color: #cbd5e1;
+}
+
+.btn-clonar:hover {
   background-color: #e2e8f0;
 }
 
-.btn-borrar {
+.btn-eliminar {
   background-color: #fef2f2;
   color: #991b1b;
-  border: 1px solid #fecaca;
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s;
+  border-color: #fecaca;
 }
 
-.btn-borrar:hover {
+.btn-eliminar:hover {
   background-color: #fecaca;
 }
 
-.texto-vacio {
+.texto-cargando {
   text-align: center;
   color: #64748b;
-  padding: 20px;
+  padding: 30px;
 }
 </style>

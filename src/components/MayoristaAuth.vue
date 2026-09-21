@@ -11,27 +11,25 @@ const cargando = ref(false)
 const errorMensaje = ref('')
 const exitoMensaje = ref('')
 
-// Campos Login
+// Campos
 const loginEmail = ref('')
 const loginPassword = ref('')
-
-// Campos Registro
 const regNombre = ref('')
 const regApellido = ref('')
 const regEmail = ref('')
 const regPassword = ref('')
-
-// Campo Código Verificación
 const codigoVerificacion = ref('')
 
-// PASO 1: Validar credenciales e iniciar flujo de código
+const API_BASE = 'http://127.0.0.1:8000/api'
+
+// PASO 1: Validar credenciales
 const manejarLogin = async () => {
   errorMensaje.value = ''
   exitoMensaje.value = ''
   cargando.value = true
 
   try {
-    const res = await fetch('http://127.0.0.1:8000/api/login', {
+    const res = await fetch(`${API_BASE}/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -43,7 +41,6 @@ const manejarLogin = async () => {
     const data = await res.json()
     if (!res.ok) throw new Error(data.mensaje || 'Error al iniciar sesión')
 
-    // Al ser válidas las credenciales, avanzamos a la pantalla del código
     esperandoCodigo.value = true
     exitoMensaje.value = `Código de verificación enviado a ${loginEmail.value}. Revisá tu casilla de correo.`
   } catch (err) {
@@ -53,7 +50,7 @@ const manejarLogin = async () => {
   }
 }
 
-// PASO 1 (Alternativo): Registro de usuario
+// PASO 1 (Alt): Registro
 const manejarRegistro = async () => {
   errorMensaje.value = ''
   exitoMensaje.value = ''
@@ -66,7 +63,7 @@ const manejarRegistro = async () => {
   cargando.value = true
 
   try {
-    const res = await fetch('http://127.0.0.1:8000/api/register', {
+    const res = await fetch(`${API_BASE}/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -80,7 +77,6 @@ const manejarRegistro = async () => {
     const data = await res.json()
     if (!res.ok) throw new Error(data.mensaje || 'Error al registrar usuario')
 
-    // Guardamos el email registrado para usarlo en la verificación
     loginEmail.value = regEmail.value
     esperandoCodigo.value = true
     exitoMensaje.value = `Código de verificación enviado a ${regEmail.value}. Revisá tu casilla de correo.`
@@ -91,7 +87,7 @@ const manejarRegistro = async () => {
   }
 }
 
-// PASO 2: Verificar el código de 6 dígitos para otorgar acceso final
+// PASO 2: Verificar código OTP
 const manejarVerificacionCodigo = async () => {
   errorMensaje.value = ''
   exitoMensaje.value = ''
@@ -105,7 +101,7 @@ const manejarVerificacionCodigo = async () => {
   cargando.value = true
 
   try {
-    const res = await fetch('http://127.0.0.1:8000/api/verificar-email', {
+    const res = await fetch(`${API_BASE}/verificar-email`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -117,10 +113,12 @@ const manejarVerificacionCodigo = async () => {
     const data = await res.json()
     if (!res.ok) throw new Error(data.mensaje || 'Código inválido o expirado')
 
-    // Guardado de sesión tras validar código
+    // Almacenamiento de credenciales y sesión
     localStorage.setItem('token', data.token)
     localStorage.setItem('usuario_activo', JSON.stringify(data.usuario))
     localStorage.setItem('mayorista_desbloqueado', 'true')
+    
+    // Notifica el cambio de almacenamiento para actualizar HeaderMayorista al instante
     window.dispatchEvent(new Event('storage'))
 
     esperandoCodigo.value = false
@@ -142,230 +140,393 @@ const cambiarModo = (esLogin) => {
 </script>
 
 <template>
-  <div class="auth-mayorista-container">
-    <div class="auth-card">
-      <div class="encabezado">
-        <h2>Portal Mayoristas</h2>
-        <p>Acceso exclusivo para distribuidores y comercios</p>
-      </div>
+  <div class="pantalla-login">
+    <!-- COLUMNA IZQUIERDA: INFORMACIÓN DE MAYORISTAS -->
+    <div class="panel-info">
+      <span class="badge">Acceso Exclusivo</span>
+      <h1>Portal Mayoristas</h1>
+      <p class="descripcion-info">
+        Gestioná tus compras corporativas, actualizá el catálogo de tu negocio y accedé a precios diferenciados con despacho a todo Uruguay.
+      </p>
 
-      <!-- Selector de pestaña -->
-      <div class="selector-tabs" v-if="!esperandoCodigo">
-        <button :class="{ activo: modoLogin }" @click="cambiarModo(true)">Ingresar</button>
-        <button :class="{ activo: !modoLogin }" @click="cambiarModo(false)">Registrarse</button>
-      </div>
+      <ul class="beneficios">
+        <li>
+          <span class="icono">✓</span>
+          <div>
+            <strong>Autenticación en 2 Pasos:</strong> Seguridad garantizada con código de verificación por correo electrónico.
+          </div>
+        </li>
+        <li>
+          <span class="icono">✓</span>
+          <div>
+            <strong>Gestión de Inventario:</strong> Control de stock, carga masiva de lotes y lista de precios mayoristas.
+          </div>
+        </li>
+        <li>
+          <span class="icono">✓</span>
+          <div>
+            <strong>Atención Preferencial:</strong> Soporte directo para distribuidores y locales minoristas asociados.
+          </div>
+        </li>
+      </ul>
+    </div>
 
-      <p v-if="errorMensaje" class="mensaje error">{{ errorMensaje }}</p>
-      <p v-if="exitoMensaje" class="mensaje exito">{{ exitoMensaje }}</p>
-
-      <!-- FORMULARIO LOGIN (PASO 1) -->
-      <form v-if="modoLogin && !esperandoCodigo" @submit.prevent="manejarLogin" class="formulario">
-        <div class="campo">
-          <label>Correo Electrónico</label>
-          <input type="email" v-model="loginEmail" required placeholder="empresa@correo.com" />
-        </div>
-        <div class="campo">
-          <label>Contraseña</label>
-          <input type="password" v-model="loginPassword" required placeholder="••••••••" />
-        </div>
-        <button type="submit" class="btn-submit" :disabled="cargando">
-          {{ cargando ? 'Iniciando sesión...' : 'Ingresar al Portal' }}
-        </button>
-      </form>
-
-      <!-- FORMULARIO REGISTRO (PASO 1) -->
-      <form v-else-if="!modoLogin && !esperandoCodigo" @submit.prevent="manejarRegistro" class="formulario">
-        <div class="campo">
-          <label>Nombre</label>
-          <input type="text" v-model="regNombre" required placeholder="Juan" />
-        </div>
-        <div class="campo">
-          <label>Apellido</label>
-          <input type="text" v-model="regApellido" required placeholder="Pérez" />
-        </div>
-        <div class="campo">
-          <label>Correo Electrónico</label>
-          <input type="email" v-model="regEmail" required placeholder="contacto@empresa.com" />
-        </div>
-        <div class="campo">
-          <label>Contraseña</label>
-          <input type="password" v-model="regPassword" required minlength="8" placeholder="••••••••" />
-        </div>
-        <button type="submit" class="btn-submit" :disabled="cargando">
-          {{ cargando ? 'Enviando código...' : 'Enviar Código de Verificación' }}
-        </button>
-      </form>
-
-      <!-- FORMULARIO VERIFICACIÓN DE CÓDIGO (PASO 2) -->
-      <form v-else @submit.prevent="manejarVerificacionCodigo" class="formulario">
-        <div class="info-gmail">
-          <p>Revisá tu bandeja de entrada o carpeta de Spam en Gmail e ingresá el código de 6 dígitos que te enviamos.</p>
+    <!-- COLUMNA DERECHA: TARJETA DE FORMULARIO -->
+    <div class="inicio-container">
+      <section class="hero">
+        <div class="tabs" v-if="!esperandoCodigo">
+          <button 
+            type="button" 
+            :class="{ activo: !modoLogin }" 
+            @click="cambiarModo(false)"
+          >
+            Registrarse
+          </button>
+          <button 
+            type="button" 
+            :class="{ activo: modoLogin }" 
+            @click="cambiarModo(true)"
+          >
+            Iniciar Sesión
+          </button>
         </div>
 
-        <div class="campo">
-          <label>Código de Verificación</label>
-          <input 
-            type="text" 
-            v-model="codigoVerificacion" 
-            required 
-            maxlength="6" 
-            placeholder="123456" 
-            class="input-codigo"
-            autocomplete="one-time-code"
-          />
+        <template v-if="!esperandoCodigo">
+          <h2>{{ modoLogin ? 'Iniciar Sesión' : 'Crear Cuenta Mayorista' }}</h2> 
+          <p>{{ modoLogin ? 'Ingresá tus credenciales autorizadas' : 'Completa tus datos para solicitar acceso' }}</p>
+        </template>
+        <template v-else>
+          <h2>Verificación de Correo</h2>
+          <p>Ingresá el código enviado a tu casilla</p>
+        </template>
+
+        <!-- ALERTAS -->
+        <div v-if="errorMensaje" class="alerta-error">
+          {{ errorMensaje }}
         </div>
 
-        <button type="submit" class="btn-submit" :disabled="cargando">
-          {{ cargando ? 'Verificando...' : 'Verificar y Continuar' }}
-        </button>
+        <div v-if="exitoMensaje" class="alerta-exito">
+          {{ exitoMensaje }}
+        </div>
 
-        <button type="button" class="btn-secundario" @click="esperandoCodigo = false">
-          ← Cancelar y volver
-        </button>
-      </form>
+        <!-- FORMULARIO LOGIN (PASO 1) -->
+        <form v-if="modoLogin && !esperandoCodigo" @submit.prevent="manejarLogin" class="formulario">
+          <div class="campo">
+            <label>Correo electrónico</label>
+            <input type="email" v-model="loginEmail" required placeholder="empresa@correo.com" />
+          </div>
+          <div class="campo">
+            <label>Contraseña</label>
+            <input type="password" v-model="loginPassword" required placeholder="••••••••" />
+          </div>
+          <button type="submit" class="btn-principal" :disabled="cargando">
+            {{ cargando ? 'Verificando...' : 'Ingresar al Portal' }}
+          </button>
+        </form>
+
+        <!-- FORMULARIO REGISTRO (PASO 1) -->
+        <form v-else-if="!modoLogin && !esperandoCodigo" @submit.prevent="manejarRegistro" class="formulario">
+          <div class="campo">
+            <label>Nombre</label>
+            <input type="text" v-model="regNombre" required placeholder="Juan" />
+          </div>
+          <div class="campo">
+            <label>Apellido</label>
+            <input type="text" v-model="regApellido" required placeholder="Pérez" />
+          </div>
+          <div class="campo">
+            <label>Correo electrónico</label>
+            <input type="email" v-model="regEmail" required placeholder="contacto@empresa.com" />
+          </div>
+          <div class="campo">
+            <label>Contraseña</label>
+            <input type="password" v-model="regPassword" required minlength="8" placeholder="••••••••" />
+          </div>
+          <button type="submit" class="btn-principal" :disabled="cargando">
+            {{ cargando ? 'Enviando código...' : 'Solicitar Código' }}
+          </button>
+        </form>
+
+        <!-- FORMULARIO VERIFICACIÓN (PASO 2) -->
+        <form v-else @submit.prevent="manejarVerificacionCodigo" class="formulario">
+          <div class="campo">
+            <label>Código de 6 dígitos</label>
+            <input 
+              type="text" 
+              v-model="codigoVerificacion" 
+              required 
+              maxlength="6" 
+              placeholder="123456" 
+              class="input-codigo"
+              autocomplete="one-time-code"
+            />
+          </div>
+
+          <button type="submit" class="btn-principal" :disabled="cargando">
+            {{ cargando ? 'Validando...' : 'Verificar y Entrar' }}
+          </button>
+
+          <button type="button" class="btn-volver" @click="esperandoCodigo = false">
+            ← Cancelar y volver
+          </button>
+        </form>
+      </section>
     </div>
   </div>
 </template>
 
 <style scoped>
-.auth-mayorista-container {
-  min-height: 80vh;
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+.pantalla-login {
   display: flex;
-  justify-content: center;
   align-items: center;
-  background-color: #d9d0c9;
+  justify-content: space-between;
+  max-width: 1100px;
+  margin: 50px auto;
+  padding: 0 20px;
+  gap: 50px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-.auth-card {
-  background: #ffffff;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 420px;
+.panel-info {
+  flex: 1;
+  text-align: left;
+  color: #1e293b;
 }
 
-.encabezado {
-  text-align: center;
-  margin-bottom: 20px;
+.badge {
+  display: inline-block;
+  background-color: #e2e8f0;
+  color: #334155;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
 }
 
-.encabezado h2 {
-  margin: 0;
+.panel-info h1 {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 2.5rem;
   color: #0f172a;
+  line-height: 1.2;
+  margin-bottom: 15px;
 }
 
-.encabezado p {
-  color: #64748b;
-  font-size: 0.85rem;
-  margin-top: 5px;
+.descripcion-info {
+  font-size: 1.05rem;
+  color: #475569;
+  line-height: 1.6;
+  margin-bottom: 30px;
 }
 
-.selector-tabs {
+.beneficios {
+  list-style: none;
+  padding: 0;
+  margin: 0;
   display: flex;
-  margin-bottom: 20px;
-  border-bottom: 2px solid #e2e8f0;
+  flex-direction: column;
+  gap: 18px;
 }
 
-.selector-tabs button {
+.beneficios li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.95rem;
+  color: #334155;
+  line-height: 1.4;
+}
+
+.beneficios .icono {
+  background-color: #b85141;
+  color: white;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: bold;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.inicio-container {
+  flex: 1;
+  max-width: 450px;
+  width: 100%;
+}
+
+.hero {
+  background: #3c4a57;
+  border: 1px solid #e2e8f0;
+  padding: 40px 30px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.tabs {
+  display: flex;
+  background-color: #f1f5f9;
+  border-radius: 8px;
+  padding: 4px;
+  margin-bottom: 25px;
+}
+
+.tabs button {
   flex: 1;
   padding: 10px;
   border: none;
-  background: none;
+  background: transparent;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.95rem;
   font-weight: bold;
   color: #64748b;
-  cursor: pointer;
-}
-
-.selector-tabs button.activo {
-  color: #1e293b;
-  border-bottom: 3px solid #b84941;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.info-gmail {
-  background-color: #f8fafc;
-  border: 1px dashed #cbd5e1;
-  padding: 12px;
   border-radius: 6px;
-  margin-bottom: 15px;
-  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.info-gmail p {
-  margin: 0;
-  font-size: 0.85rem;
-  color: #475569;
+.tabs button.activo {
+  background-color: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.formulario .campo {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 15px;
-}
-
-.campo label {
-  font-size: 0.85rem;
-  font-weight: bold;
-  color: #334155;
+.hero h2 {
+  font-family: 'Lora', Georgia, serif;
+  font-size: 1.8rem;
+  font-style: italic;
+  font-weight: 700;
+  color: #ffffff;
   margin-bottom: 5px;
 }
 
+.hero p {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.95rem;
+  color: #f1f5f9;
+  margin-bottom: 25px;
+  line-height: 1.4;
+}
+
+.alerta-error {
+  background-color: #fef2f2;
+  color: #921919;
+  border: 1px solid #fecaca;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.alerta-exito {
+  background-color: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  gap: 6px;
+}
+
+.campo label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
 .campo input {
-  padding: 10px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  padding: 12px 14px;
   border: 1px solid #cbd5e1;
-  border-radius: 6px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.campo input:focus {
+  border-color: #b85141;
+  box-shadow: 0 0 0 3px rgba(184, 81, 65, 0.2);
 }
 
 .input-codigo {
   text-align: center;
-  font-size: 1.5rem;
-  letter-spacing: 6px;
+  font-size: 1.6rem !important;
+  letter-spacing: 8px;
   font-weight: bold;
 }
 
-.btn-submit {
-  width: 100%;
-  padding: 12px;
-  background-color: #0f172a;
+.btn-principal {
+  margin-top: 10px;
+  display: inline-block;
+  background-color: #b85141;
   color: white;
   border: none;
-  border-radius: 6px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.05rem;
   font-weight: bold;
+  padding: 12px;
+  border-radius: 8px;
   cursor: pointer;
-  margin-top: 10px;
+  transition: background-color 0.2s, transform 0.1s;
 }
 
-.btn-submit:disabled {
+.btn-principal:hover:not(:disabled) {
+  background-color: #7e1b1b;
+}
+
+.btn-principal:disabled {
   opacity: 0.7;
   cursor: not-allowed;
 }
 
-.btn-secundario {
-  width: 100%;
-  padding: 8px;
+.btn-volver {
   background: transparent;
-  color: #64748b;
+  color: #cbd5e1;
   border: none;
   font-size: 0.85rem;
   cursor: pointer;
-  margin-top: 8px;
+  margin-top: 5px;
 }
 
-.mensaje {
-  padding: 10px;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  text-align: center;
+.btn-volver:hover {
+  color: #ffffff;
 }
 
-.mensaje.error {
-  background-color: #fef2f2;
-  color: #ef4444;
-}
-
-.mensaje.exito {
-  background-color: #f0fdf4;
-  color: #16a34a;
+@media (max-width: 850px) {
+  .pantalla-login {
+    flex-direction: column;
+    margin: 20px auto;
+    gap: 30px;
+  }
+  .panel-info {
+    text-align: center;
+  }
+  .beneficios li {
+    text-align: left;
+  }
 }
 </style>

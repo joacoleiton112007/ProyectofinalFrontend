@@ -3,13 +3,16 @@ import { ref, computed } from 'vue';
 import { RouterView, useRouter, useRoute } from 'vue-router';
 import { useCarritoStore } from '@/stores/carritoStore';
 import { useLibrosStore } from '@/stores/librosstore';
+import HeaderMayorista from '@/components/HeaderMayorista.vue';
 
 const router = useRouter();
 const route = useRoute();
 const carritoStore = useCarritoStore();
 const librosStore = useLibrosStore();
 
-// Leemos el usuario activo desde el localStorage que usa Inicio.vue
+// Comprueba si la ruta actual pertenece al portal mayorista
+const esRutaMayorista = computed(() => route.path.startsWith('/mayorista'));
+
 const usuarioActivo = ref(JSON.parse(localStorage.getItem('usuario_activo')) || null);
 const mostrarMenuCuenta = ref(false);
 
@@ -23,13 +26,10 @@ const navegarAInicio = () => { router.push('/'); };
 const navegarACatalogo = () => { router.push('/listado'); };
 const navegarACarrito = () => { router.push('/carrito'); };
 
-// Comportamiento del botón superior derecho
 const manejarAccionCuenta = () => {
   if (usuarioActivo.value) {
-    // Si hay sesión, despliega el menú de configuración/cuenta
     mostrarMenuCuenta.value = !mostrarMenuCuenta.value;
   } else {
-    // Si no hay sesión, va a la pantalla de inicio (login/registro)
     router.push('/');
   }
 };
@@ -44,67 +44,69 @@ const cerrarSesion = () => {
 
 <template>
   <div class="app-container">
-    <!-- Nivel 1: Header superior blanco con buscador -->
-    <header class="header-top">
-      <div class="logo" @click="navegarAInicio">
-        <h2><img src="/src/assets/images/AbastoLogo250x125.png" alt="AbastoLogo" width="300" height="125" /></h2>
-      </div>
+    <!-- Renderiza Header Mayorista si la ruta inicia con /mayorista -->
+    <HeaderMayorista v-if="esRutaMayorista" />
 
-      <div class="search-bar-container">
-        <input 
-          type="text" 
-          v-model="librosStore.textoBuscado" 
-          placeholder="Buscar productos..." 
-        />
-      </div>
+    <!-- Renderiza Header Público en el resto de la app -->
+    <template v-else>
+      <header class="header-top">
+        <div class="logo" @click="navegarAInicio">
+          <h2><img src="/src/assets/images/AbastoLogo250x125.png" alt="AbastoLogo" width="300" height="125" /></h2>
+        </div>
 
-      <div class="header-actions cuenta-container">
-        <!-- Botón Dinámico: Muestra el nombre si está logueado, o "Cuenta" si no -->
-        <button class="action-btn" @click="manejarAccionCuenta">
-          <span>👤</span> 
-          {{ usuarioActivo ? usuarioActivo.nombre : 'Cuenta' }}
-        </button>
+        <div class="search-bar-container">
+          <input 
+            type="text" 
+            v-model="librosStore.textoBuscado" 
+            placeholder="Buscar productos..." 
+          />
+        </div>
 
-        <!-- Menú desplegable de configuraciones (Cerrar Sesión) -->
-        <div v-if="usuarioActivo && mostrarMenuCuenta" class="dropdown-cuenta">
-          <div class="dropdown-header">
-            <p>Conectado como:<br/><strong>{{ usuarioActivo.email }}</strong></p>
+        <div class="header-actions cuenta-container">
+          <button class="action-btn" @click="manejarAccionCuenta">
+            <span>👤</span> 
+            {{ usuarioActivo ? usuarioActivo.nombre : 'Cuenta' }}
+          </button>
+
+          <div v-if="usuarioActivo && mostrarMenuCuenta" class="dropdown-cuenta">
+            <div class="dropdown-header">
+              <p>Conectado como:<br/><strong>{{ usuarioActivo.email }}</strong></p>
+            </div>
+            <hr />
+            <button @click="cerrarSesion" class="dropdown-item btn-salir">
+              🚪 Cerrar Sesión
+            </button>
           </div>
-          <hr />
-          <button @click="cerrarSesion" class="dropdown-item btn-salir">
-            🚪 Cerrar Sesión
+        </div>
+      </header>
+
+      <nav class="main-navbar">
+        <div class="nav-links">
+          <button 
+            :class="{ active: pestañaActual === 'inicio' }" 
+            @click="navegarAInicio"
+          >
+            Inicio
+          </button>
+          <button 
+            :class="{ active: pestañaActual === 'catalogo' }" 
+            @click="navegarACatalogo"
+          >
+            Ver Catálogo
           </button>
         </div>
-      </div>
-    </header>
 
-    <!-- Nivel 2: Barra de navegación oscura estilo e-commerce -->
-    <nav class="main-navbar">
-      <div class="nav-links">
-        <button 
-          :class="{ active: pestañaActual === 'inicio' }" 
-          @click="navegarAInicio"
-        >
-          Inicio
-        </button>
-        <button 
-          :class="{ active: pestañaActual === 'catalogo' }" 
-          @click="navegarACatalogo"
-        >
-          Ver Catálogo
-        </button>
-      </div>
-
-      <div class="cart-shortcut" @click="navegarACarrito">
-        <span>🛒</span>
-        <span class="cart-total">
-          ${{ Number(carritoStore.total || 0).toLocaleString('es-UY', { minimumFractionDigits: 2 }) }}
-        </span>
-        <span v-if="carritoStore.cantidadTotalItems > 0" class="badge-carrito">
-          {{ carritoStore.cantidadTotalItems }}
-        </span>
-      </div>
-    </nav>
+        <div class="cart-shortcut" @click="navegarACarrito">
+          <span>🛒</span>
+          <span class="cart-total">
+            ${{ Number(carritoStore.total || 0).toLocaleString('es-UY', { minimumFractionDigits: 2 }) }}
+          </span>
+          <span v-if="carritoStore.cantidadTotalItems > 0" class="badge-carrito">
+            {{ carritoStore.cantidadTotalItems }}
+          </span>
+        </div>
+      </nav>
+    </template>
 
     <main class="content">
       <RouterView />
@@ -118,7 +120,6 @@ const cerrarSesion = () => {
   background-color: #d9d0c9;
 }
 
-/* Header Superior Gris */
 .header-top {
   display: flex;
   align-items: center;
@@ -165,7 +166,6 @@ const cerrarSesion = () => {
   gap: 20px;
 }
 
-/* Contenedor y Menú Desplegable de Cuenta */
 .cuenta-container {
   position: relative;
 }
@@ -234,7 +234,6 @@ const cerrarSesion = () => {
   background-color: #fdf2f2;
 }
 
-/* Barra Oscura de Navegación */
 .main-navbar {
   background-color: #3c4a57;
   padding: 0 40px;
