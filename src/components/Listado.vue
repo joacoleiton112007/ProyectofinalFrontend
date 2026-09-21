@@ -1,11 +1,12 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { apiFetch } from '@/services/api.js';
+import { useLibrosStore } from '@/stores/librosstore'; // <--- Importante
 import TarjetaPrenda from './TarjetaPrenda.vue';
 
+const librosStore = useLibrosStore(); // <--- Usamos el store global
 const productos = ref([]);
 const generoSeleccionado = ref('Todos');
-const textoBuscado = ref('');
 
 // Cargar productos desde la API de Laravel al montar el componente
 onMounted(async () => {
@@ -26,11 +27,11 @@ const generosDisponibles = computed(() => {
   return ['Todos', ...new Set(categorias)];
 });
 
-// Filtrar por categoría y buscador
+// Filtrar por categoría y buscador (leyendo desde librosStore.textoBuscado)
 const librosFiltrados = computed(() => {
   if (!productos.value.length) return [];
   
-  const termino = textoBuscado.value.toLowerCase().trim();
+  const termino = (librosStore.textoBuscado || '').toLowerCase().trim();
 
   return productos.value.filter(producto => {
     const catNombre = producto.categoria?.nombre || producto.genero;
