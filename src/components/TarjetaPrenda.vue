@@ -14,10 +14,11 @@ const props = defineProps({
 const router = useRouter();
 const carritoStore = useCarritoStore();
 
-// Cargar mapa de assets de Vite (IMPRESCINDIBLE)
+// Cargar mapa de assets de Vite
 const imagenesAssets = import.meta.glob('@/assets/images/*.{png,jpg,jpeg,svg,webp}', { eager: true, import: 'default' });
 
 const obtenerImagen = (nombreArchivo) => {
+  // 0. Si viene null, undefined o vacío, devolvemos una imagen por defecto
   if (!nombreArchivo || typeof nombreArchivo !== 'string') {
     return 'https://placehold.co/300x300?text=Sin+Imagen';
   }
@@ -29,10 +30,8 @@ const obtenerImagen = (nombreArchivo) => {
     return archivoClean;
   }
 
-  // 2. BUSCAR PRIMERO EN ASSETS LOCALES DE VUE (src/assets/images)
-  // Limpiamos prefijos de ruta para buscar la coincidencia directa
+  // 2. Buscar primero en assets locales de Vue (src/assets/images)
   const nombreSolo = archivoClean.replace(/^productos\//, '');
-
   const claveEncontrada = Object.keys(imagenesAssets).find(key => {
     const nombreEnRuta = key.split('/').pop();
     return nombreEnRuta.toLowerCase() === nombreSolo.toLowerCase();
@@ -42,7 +41,7 @@ const obtenerImagen = (nombreArchivo) => {
     return imagenesAssets[claveEncontrada];
   }
 
-  // 3. Si es una ruta explícita que ya apunta a storage o images de Laravel
+  // 3. Si es una ruta explícita que apunta a storage o images de Laravel
   if (archivoClean.startsWith('/storage/') || archivoClean.startsWith('/images/')) {
     return `http://127.0.0.1:8000${archivoClean}`;
   }

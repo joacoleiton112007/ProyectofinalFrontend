@@ -65,32 +65,46 @@ const agregarProducto = async () => {
   if (!nuevoProducto.value.nombre || nuevoProducto.value.precio <= 0 || !nuevoProducto.value.categoria_id) return;
 
   try {
-    const formData = new FormData();
-    formData.append('nombre', nuevoProducto.value.nombre);
-    formData.append('precio', nuevoProducto.value.precio);
-    formData.append('categoria_id', nuevoProducto.value.categoria_id);
-    formData.append('descripcion', nuevoProducto.value.descripcion || `Pack de ${nuevoProducto.value.nombre}`);
+    let res;
 
+    // Si seleccionó subir un archivo físico de la PC
     if (origenImagen.value === 'archivo' && archivoSeleccionado.value) {
+      const formData = new FormData();
+      formData.append('nombre', nuevoProducto.value.nombre);
+      formData.append('precio', nuevoProducto.value.precio);
+      formData.append('categoria_id', nuevoProducto.value.categoria_id);
+      formData.append('descripcion', nuevoProducto.value.descripcion || `Pack de ${nuevoProducto.value.nombre}`);
       formData.append('imagen_file', archivoSeleccionado.value);
-    } else {
-      formData.append('imagen', nuevoProducto.value.imagen);
+
+      const token = localStorage.getItem('token');
+      const headers = {};
+      if (token) headers.Authorization = `Bearer ${token}`;
+
+      const resRaw = await fetch('http://127.0.0.1:8000/api/productos', {
+        method: 'POST',
+        headers,
+        body: formData
+      });
+
+      res = await resRaw.json();
+    } 
+    // Si seleccionó de la lista desplegable (Enviamos JSON limpio vía apiFetch)
+    else {
+      const payload = {
+        nombre: nuevoProducto.value.nombre,
+        precio: nuevoProducto.value.precio,
+        categoria_id: nuevoProducto.value.categoria_id,
+        descripcion: nuevoProducto.value.descripcion || `Pack de ${nuevoProducto.value.nombre}`,
+        imagen: nuevoProducto.value.imagen || 'Camisa.png'
+      };
+
+      res = await apiFetch('/productos', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
     }
 
-    // Petición POST con FormData
-    const token = localStorage.getItem('token');
-    const headers = {};
-    if (token) headers.Authorization = `Bearer ${token}`;
-
-    const resRaw = await fetch('http://127.0.0.1:8000/api/productos', {
-      method: 'POST',
-      headers,
-      body: formData
-    });
-
-    const res = await resRaw.json();
-
-    if (res.producto) {
+    if (res && res.producto) {
       productos.value.push(res.producto);
       nuevoProducto.value = {
         nombre: '',
