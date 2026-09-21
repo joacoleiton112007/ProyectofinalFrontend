@@ -11,29 +11,56 @@ const carritoStore = useCarritoStore();
 const libro = ref(null);
 const cargando = ref(true);
 
-// Inicializamos el mínimo en 10 unidades
+// Mínimo 10 prendas
 const cantidad = ref(10);
 
-// Carga dinámica de imágenes locales
-const imagenes = import.meta.glob('../assets/images/*', { eager: true, import: 'default' });
+// Carga de imágenes locales desde Vite
+const imagenesAssets = import.meta.glob('@/assets/images/*.{png,jpg,jpeg,svg,webp}', { eager: true, import: 'default' });
 
 const obtenerImagen = (nombreArchivo) => {
-  if (!nombreArchivo) return 'https://via.placeholder.com/300';
-  const claveEncontrada = Object.keys(imagenes).find(key => key.toLowerCase().endsWith(nombreArchivo.toLowerCase()));
-  return claveEncontrada ? imagenes[claveEncontrada] : 'https://via.placeholder.com/300';
+  if (!nombreArchivo || typeof nombreArchivo !== 'string') {
+    return 'https://placehold.co/300x300?text=Sin+Imagen';
+  }
+
+  const archivoClean = nombreArchivo.trim();
+
+  // 1. URL absoluta
+  if (archivoClean.startsWith('http://') || archivoClean.startsWith('https://')) {
+    return archivoClean;
+  }
+
+  // 2. Coincidencia local en src/assets/images
+  const nombreSolo = archivoClean.replace(/^productos\//, '');
+  const claveEncontrada = Object.keys(imagenesAssets).find(key => {
+    const nombreEnRuta = key.split('/').pop();
+    return nombreEnRuta.toLowerCase() === nombreSolo.toLowerCase();
+  });
+
+  if (claveEncontrada) {
+    return imagenesAssets[claveEncontrada];
+  }
+
+  // 3. Servidor Laravel
+  if (archivoClean.startsWith('/storage/') || archivoClean.startsWith('storage/')) {
+    return `http://127.0.0.1:8000/${archivoClean.replace(/^\//, '')}`;
+  }
+
+  return `http://127.0.0.1:8000/storage/productos/${nombreSolo}`;
 };
 
 onMounted(async () => {
   try {
-    libro.value = await apiFetch(`/productos/${route.params.id}`);
+    // Si la ruta en router es /libro/:id o /producto/:id
+    const id = route.params.id;
+    libro.value = await apiFetch(`/productos/${id}`);
   } catch (error) {
-    console.error('Error al cargar la prenda:', error.message);
+    console.error('Error al cargar la prenda:', error);
   } finally {
     cargando.value = false;
   }
 });
 
-// Forzar que la cantidad nunca baje de 10 ni supere 25
+// Limitar cantidad entre 10 y 25 unidades
 watch(cantidad, (nuevoValor) => {
   if (nuevoValor > 25) {
     cantidad.value = 25;
@@ -42,16 +69,18 @@ watch(cantidad, (nuevoValor) => {
   }
 });
 
+// Lógica de descuentos requerida: 20% base (10 u), 30% (20 u) y 35% (25 u)
 const porcentajeDescuento = computed(() => {
-  if (cantidad.value >= 20) return 40;
-  if (cantidad.value >= 10) return 30;
+  if (cantidad.value >= 25) return 35;
+  if (cantidad.value >= 20) return 30;
+  if (cantidad.value >= 10) return 20;
   return 0;
 });
 
-// Cálculo unitario para que suba de a 1 remera individual
+// Precio base unitario (dividido 10)
 const precioPorPrendaBase = computed(() => {
   if (!libro.value) return 0;
-  const precioPack = Number(libro.value.precio) || 0;
+  const precioPack = Number(libro.value.precio || libro.value.precio_uyu) || 0;
   return precioPack / 10;
 });
 
@@ -82,9 +111,8 @@ const agregarAlCarrito = () => {
 
   const resultado = carritoStore.agregarAlCarrito(prendaAñadir);
 
-  if (!resultado.exito) {
-    alert(resultado.mensaje);
-    router.push('/inicio');
+  if (!resultado?.exito) {
+    alert(resultado?.mensaje || 'Error al agregar al carrito');
   } else {
     alert(`Prenda(s) agregada(s) al carrito con éxito (${porcentajeDescuento.value}% OFF)`);
   }

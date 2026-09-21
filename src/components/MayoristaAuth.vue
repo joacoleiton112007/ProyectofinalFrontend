@@ -5,7 +5,8 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const modoLogin = ref(true)
-const esperandoCodigo = ref(false) // Estado para el paso del código (Login o Registro)
+const esperandoCodigo = ref(false)
+const cargando = ref(false)
 
 const errorMensaje = ref('')
 const exitoMensaje = ref('')
@@ -23,9 +24,11 @@ const regPassword = ref('')
 // Campo Código Verificación
 const codigoVerificacion = ref('')
 
+// PASO 1: Validar credenciales e iniciar flujo de código
 const manejarLogin = async () => {
   errorMensaje.value = ''
   exitoMensaje.value = ''
+  cargando.value = true
 
   try {
     const res = await fetch('http://127.0.0.1:8000/api/login', {
@@ -40,25 +43,17 @@ const manejarLogin = async () => {
     const data = await res.json()
     if (!res.ok) throw new Error(data.mensaje || 'Error al iniciar sesión')
 
-    // Si el backend pide verificación por código en el login
-    if (data.requiere_codigo) {
-      esperandoCodigo.value = true
-      exitoMensaje.value = 'Código enviado a tu correo. Por favor ingresalo a continuación.'
-      return
-    }
-
-    // Si devuelve el token directo (fallback por si acaso)
-    localStorage.setItem('token', data.token)
-    localStorage.setItem('usuario_activo', JSON.stringify(data.usuario))
-    localStorage.setItem('mayorista_desbloqueado', 'true')
-    window.dispatchEvent(new Event('storage'))
-
-    router.push('/mayorista/panel')
+    // Al ser válidas las credenciales, avanzamos a la pantalla del código
+    esperandoCodigo.value = true
+    exitoMensaje.value = `Código de verificación enviado a ${loginEmail.value}. Revisá tu casilla de correo.`
   } catch (err) {
     errorMensaje.value = err.message
+  } finally {
+    cargando.value = false
   }
 }
 
+// PASO 1 (Alternativo): Registro de usuario
 const manejarRegistro = async () => {
   errorMensaje.value = ''
   exitoMensaje.value = ''
@@ -67,6 +62,8 @@ const manejarRegistro = async () => {
     errorMensaje.value = 'Completa todos los campos obligatorios.'
     return
   }
+
+  cargando.value = true
 
   try {
     const res = await fetch('http://127.0.0.1:8000/api/register', {
@@ -83,14 +80,18 @@ const manejarRegistro = async () => {
     const data = await res.json()
     if (!res.ok) throw new Error(data.mensaje || 'Error al registrar usuario')
 
-    // Avanzar al paso del código
+    // Guardamos el email registrado para usarlo en la verificación
+    loginEmail.value = regEmail.value
     esperandoCodigo.value = true
-    exitoMensaje.value = 'Código enviado a tu correo. Por favor ingresalo a continuación.'
+    exitoMensaje.value = `Código de verificación enviado a ${regEmail.value}. Revisá tu casilla de correo.`
   } catch (err) {
     errorMensaje.value = err.message
+  } finally {
+    cargando.value = false
   }
 }
 
+// PASO 2: Verificar el código de 6 dígitos para otorgar acceso final
 const manejarVerificacionCodigo = async () => {
   errorMensaje.value = ''
   exitoMensaje.value = ''
@@ -100,8 +101,8 @@ const manejarVerificacionCodigo = async () => {
     return
   }
 
-  // Identifica el email según si vino de Login o Registro
-  const emailAEnviar = modoLogin.value ? loginEmail.value : regEmail.value
+  const emailAEnviar = modoLogin.value ? loginEmail.value : (regEmail.value || loginEmail.value)
+  cargando.value = true
 
   try {
     const res = await fetch('http://127.0.0.1:8000/api/verificar-email', {
@@ -116,7 +117,7 @@ const manejarVerificacionCodigo = async () => {
     const data = await res.json()
     if (!res.ok) throw new Error(data.mensaje || 'Código inválido o expirado')
 
-    // Al verificar correctamente, guardamos las credenciales y redirigimos al panel
+    // Guardado de sesión tras validar código
     localStorage.setItem('token', data.token)
     localStorage.setItem('usuario_activo', JSON.stringify(data.usuario))
     localStorage.setItem('mayorista_desbloqueado', 'true')
@@ -126,12 +127,15 @@ const manejarVerificacionCodigo = async () => {
     router.push('/mayorista/panel')
   } catch (err) {
     errorMensaje.value = err.message
+  } finally {
+    cargando.value = false
   }
 }
 
 const cambiarModo = (esLogin) => {
   modoLogin.value = esLogin
   esperandoCodigo.value = false
+  codigoVerificacion.value = ''
   errorMensaje.value = ''
   exitoMensaje.value = ''
 }
@@ -145,7 +149,8 @@ const cambiarModo = (esLogin) => {
         <p>Acceso exclusivo para distribuidores y comercios</p>
       </div>
 
-      <div class="selector-tabs">
+      <!-- Selector de pestaña -->
+      <div class="selector-tabs" v-if="!esperandoCodigo">
         <button :class="{ activo: modoLogin }" @click="cambiarModo(true)">Ingresar</button>
         <button :class="{ activo: !modoLogin }" @click="cambiarModo(false)">Registrarse</button>
       </div>
@@ -161,12 +166,14 @@ const cambiarModo = (esLogin) => {
         </div>
         <div class="campo">
           <label>Contraseña</label>
-          <input type="password" v-model="loginPassword" required />
+          <input type="password" v-model="loginPassword" required placeholder="••••••••" />
         </div>
-        <button type="submit" class="btn-submit">Ingresar al Portal</button>
+        <button type="submit" class="btn-submit" :disabled="cargando">
+          {{ cargando ? 'Iniciando sesión...' : 'Ingresar al Portal' }}
+        </button>
       </form>
 
-      <!-- FORMULARIO REGISTRO (PASO 1: DATOS) -->
+      <!-- FORMULARIO REGISTRO (PASO 1) -->
       <form v-else-if="!modoLogin && !esperandoCodigo" @submit.prevent="manejarRegistro" class="formulario">
         <div class="campo">
           <label>Nombre</label>
@@ -182,15 +189,21 @@ const cambiarModo = (esLogin) => {
         </div>
         <div class="campo">
           <label>Contraseña</label>
-          <input type="password" v-model="regPassword" required minlength="8" />
+          <input type="password" v-model="regPassword" required minlength="8" placeholder="••••••••" />
         </div>
-        <button type="submit" class="btn-submit">Enviar Código de Verificación</button>
+        <button type="submit" class="btn-submit" :disabled="cargando">
+          {{ cargando ? 'Enviando código...' : 'Enviar Código de Verificación' }}
+        </button>
       </form>
 
-      <!-- FORMULARIO VERIFICACIÓN (PASO 2: CÓDIGO VERIFICACIÓN TANTO PARA LOGIN COMO REGISTRO) -->
+      <!-- FORMULARIO VERIFICACIÓN DE CÓDIGO (PASO 2) -->
       <form v-else @submit.prevent="manejarVerificacionCodigo" class="formulario">
+        <div class="info-gmail">
+          <p>Revisá tu bandeja de entrada o carpeta de Spam en Gmail e ingresá el código de 6 dígitos que te enviamos.</p>
+        </div>
+
         <div class="campo">
-          <label>Código de Verificación (6 dígitos)</label>
+          <label>Código de Verificación</label>
           <input 
             type="text" 
             v-model="codigoVerificacion" 
@@ -198,11 +211,16 @@ const cambiarModo = (esLogin) => {
             maxlength="6" 
             placeholder="123456" 
             class="input-codigo"
+            autocomplete="one-time-code"
           />
         </div>
-        <button type="submit" class="btn-submit">Verificar y Continuar</button>
+
+        <button type="submit" class="btn-submit" :disabled="cargando">
+          {{ cargando ? 'Verificando...' : 'Verificar y Continuar' }}
+        </button>
+
         <button type="button" class="btn-secundario" @click="esperandoCodigo = false">
-          ← Volver atrás
+          ← Cancelar y volver
         </button>
       </form>
     </div>
@@ -235,7 +253,6 @@ const cambiarModo = (esLogin) => {
 .encabezado h2 {
   margin: 0;
   color: #0f172a;
-  font-family: 'Dancing Script', cursive;
 }
 
 .encabezado p {
@@ -266,6 +283,21 @@ const cambiarModo = (esLogin) => {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.info-gmail {
+  background-color: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.info-gmail p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
 .formulario .campo {
   display: flex;
   flex-direction: column;
@@ -287,8 +319,8 @@ const cambiarModo = (esLogin) => {
 
 .input-codigo {
   text-align: center;
-  font-size: 1.4rem;
-  letter-spacing: 4px;
+  font-size: 1.5rem;
+  letter-spacing: 6px;
   font-weight: bold;
 }
 
@@ -304,6 +336,11 @@ const cambiarModo = (esLogin) => {
   margin-top: 10px;
 }
 
+.btn-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 .btn-secundario {
   width: 100%;
   padding: 8px;
@@ -312,7 +349,7 @@ const cambiarModo = (esLogin) => {
   border: none;
   font-size: 0.85rem;
   cursor: pointer;
-  margin-top: 5px;
+  margin-top: 8px;
 }
 
 .mensaje {
