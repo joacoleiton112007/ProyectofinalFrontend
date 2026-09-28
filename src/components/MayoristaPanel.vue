@@ -7,7 +7,7 @@ const categorias = ref([])
 const cargando = ref(false)
 
 const origenImagen = ref('lista')
-const archivoSeleccionado = ref(null)
+const imagenBase64Procesada = ref('') // <--- Guardará el string Base64 al subir archivo
 
 const imagenesDisponibles = [
   'Camisa.png', 'Musculosa.png', 'MangaLarga.png', 'Short.png',
@@ -43,49 +43,78 @@ const cargarDatos = async () => {
   }
 }
 
-const manejarArchivo = (e) => {
-  archivoSeleccionado.value = e.target.files[0] || null
+// Helper para preprocesar y convertir la imagen a Base64 con Canvas
+const convertirABase64 = (file, maxAncho = 800, calidad = 0.8) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = (event) => {
+      const img = new Image()
+      img.src = event.target.result
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        let width = img.width
+        let height = img.height
+
+        if (width > maxAncho) {
+          height = Math.round((height * maxAncho) / width)
+          width = maxAncho
+        }
+
+        canvas.width = width
+        canvas.height = height
+
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0, width, height)
+
+        resolve(canvas.toDataURL('image/jpeg', calidad))
+      }
+      img.onerror = (err) => reject(err)
+    }
+    reader.onerror = (err) => reject(err)
+  })
+}
+
+// Al seleccionar un archivo físico, se procesa inmediatamente a Base64
+const manejarArchivo = async (e) => {
+  const archivo = e.target.files[0]
+  if (archivo) {
+    try {
+      imagenBase64Procesada.value = await convertirABase64(archivo, 800, 0.8)
+    } catch (err) {
+      console.error('Error al convertir imagen a Base64:', err)
+    }
+  } else {
+    imagenBase64Procesada.value = ''
+  }
 }
 
 const agregarProducto = async () => {
   if (!nuevoProducto.value.nombre || nuevoProducto.value.precio <= 0 || !nuevoProducto.value.categoria_id) return
 
   try {
-    let res
+    // Definimos qué valor de imagen enviaremos al backend
+    let valorImagen = 'Camisa.png'
 
-    if (origenImagen.value === 'archivo' && archivoSeleccionado.value) {
-      const formData = new FormData()
-      formData.append('nombre', nuevoProducto.value.nombre)
-      formData.append('precio', nuevoProducto.value.precio)
-      formData.append('categoria_id', nuevoProducto.value.categoria_id)
-      formData.append('descripcion', nuevoProducto.value.descripcion || `Pack de ${nuevoProducto.value.nombre}`)
-      formData.append('imagen_file', archivoSeleccionado.value)
-
-      const token = localStorage.getItem('token')
-      const headers = {}
-      if (token) headers.Authorization = `Bearer ${token}`
-
-      const resRaw = await fetch('http://127.0.0.1:8000/api/productos', {
-        method: 'POST',
-        headers,
-        body: formData
-      })
-
-      res = await resRaw.json()
+    if (origenImagen.value === 'archivo' && imagenBase64Procesada.value) {
+      valorImagen = imagenBase64Procesada.value // Se manda la cadena Base64
     } else {
-      const payload = {
-        nombre: nuevoProducto.value.nombre,
-        precio: nuevoProducto.value.precio,
-        categoria_id: nuevoProducto.value.categoria_id,
-        descripcion: nuevoProducto.value.descripcion || `Pack de ${nuevoProducto.value.nombre}`,
-        imagen: nuevoProducto.value.imagen || 'Camisa.png'
-      }
-
-      res = await apiFetch('/productos', {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      })
+      valorImagen = nuevoProducto.value.imagen || 'Camisa.png' // Se manda el nombre del catálogo
     }
+
+    const payload = {
+      nombre: nuevoProducto.value.nombre,
+      precio: nuevoProducto.value.precio,
+      categoria_id: nuevoProducto.value.categoria_id,
+      descripcion: nuevoProducto.value.descripcion || `Pack de ${nuevoProducto.value.nombre}`,
+      imagen: valorImagen
+    }
+
+    // Se realiza la petición JSON normal a la API
+    const res = await apiFetch('/productos', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    })
 
     if (res && res.producto) {
       productos.value.push(res.producto)
@@ -96,7 +125,7 @@ const agregarProducto = async () => {
         descripcion: '',
         imagen: 'Camisa.png'
       }
-      archivoSeleccionado.value = null
+      imagenBase64Procesada.value = ''
     }
   } catch (error) {
     console.error('Error al agregar producto:', error)
