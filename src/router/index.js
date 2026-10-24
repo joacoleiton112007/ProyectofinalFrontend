@@ -17,10 +17,19 @@ const routes = [
   { path: '/genero/:nombreGenero', name: 'genero', component: GeneroView },
   { path: '/libro/:id', name: 'libro', component: PrendaView },
   { path: '/carrito', name: 'carrito', component: CarritoView },
-  
-  { path: RUTA_SECRET_MAYORISTA, name: 'mayorista-secreto', component: MayoristaAuth },
-  
-  { path: '/mayorista/acceso', name: 'mayorista-acceso', component: MayoristaAuth },
+
+  {
+    path: RUTA_SECRET_MAYORISTA,
+    name: 'mayorista-secreto',
+    component: MayoristaAuth
+  },
+
+  {
+    path: '/mayorista/acceso',
+    name: 'mayorista-acceso',
+    component: MayoristaAuth
+  },
+
   {
     path: '/mayorista/panel',
     name: 'mayorista-panel',
@@ -37,22 +46,22 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const mayoristaStore = useMayoristaStore()
 
+  // URL secreta → lleva a la pantalla de acceso
   if (to.path === RUTA_SECRET_MAYORISTA) {
-    localStorage.setItem('mayorista_desbloqueado', 'true')
     return next('/mayorista/acceso')
   }
 
+  // La pantalla de login es pública
+  if (to.path === '/mayorista/acceso') {
+    return next()
+  }
+
+  // Todo el portal mayorista requiere iniciar sesión
   if (to.path.startsWith('/mayorista')) {
-    const desbloqueado = localStorage.getItem('mayorista_desbloqueado') === 'true'
-
-    if (!desbloqueado) {
-      return next('/')
-    }
-
-    // Leemos la presencia del token directamente en localStorage para evitar desincronizaciones con Pinia
     const tieneToken = !!localStorage.getItem('token')
+    const estaAutenticado = mayoristaStore.estaAutenticado()
 
-    if (to.meta.requiereMayorista && !tieneToken && !mayoristaStore.estaAutenticado()) {
+    if (!tieneToken && !estaAutenticado) {
       return next('/mayorista/acceso')
     }
   }

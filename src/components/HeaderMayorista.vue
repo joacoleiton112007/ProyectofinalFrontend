@@ -1,15 +1,18 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { ref, onMounted, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
-const route = useRoute();
 
-const usuarioActivo = ref(JSON.parse(localStorage.getItem('usuario_activo')) || null);
+const usuarioActivo = ref(
+  JSON.parse(localStorage.getItem('usuario_activo')) || null
+);
+
 const mostrarMenuCuenta = ref(false);
 
 const actualizarUsuario = () => {
-  usuarioActivo.value = JSON.parse(localStorage.getItem('usuario_activo')) || null;
+  usuarioActivo.value =
+    JSON.parse(localStorage.getItem('usuario_activo')) || null;
 };
 
 onMounted(() => {
@@ -20,13 +23,9 @@ onUnmounted(() => {
   window.removeEventListener('storage', actualizarUsuario);
 });
 
-const pestañaActual = computed(() => {
-  if (route.path.includes('/panel')) return 'panel';
-  return 'login';
-});
-
-const irAlSitioPublico = () => { router.push('/'); };
-const irAlPanelMayorista = () => { router.push('/mayorista/panel'); };
+const irAlSitioPublico = () => {
+  router.push('/');
+};
 
 const toggleMenuCuenta = () => {
   if (usuarioActivo.value) {
@@ -40,58 +39,94 @@ const cerrarSesionMayorista = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('usuario_activo');
   localStorage.removeItem('mayorista_desbloqueado');
+
   usuarioActivo.value = null;
   mostrarMenuCuenta.value = false;
+
   window.dispatchEvent(new Event('storage'));
+
   router.push('/mayorista/login');
 };
 </script>
 
 <template>
   <header class="header-mayorista-wrapper">
+
     <!-- Nivel 1: Marca B2B y Gestión de Cuenta -->
     <div class="header-top-mayorista">
+
       <div class="brand-area" @click="irAlSitioPublico">
-        <img src="/src/assets/images/AbastoLogo250x125.png" alt="Abasto Logo" width="200" height="83" class="logo-img" />
-        <span class="badge-b2b">PORTAL MAYORISTA</span>
+        <img
+          src="/src/assets/images/AbastoLogo250x125.png"
+          alt="Abasto Logo"
+          width="200"
+          height="83"
+          class="logo-img"
+        />
+
+        <span class="badge-b2b">
+          PORTAL MAYORISTA
+        </span>
       </div>
 
       <div class="cuenta-container">
-        <button class="action-btn-mayorista" @click="toggleMenuCuenta">
-          <span>🏢</span> 
-          {{ usuarioActivo ? (usuarioActivo.nombre || usuarioActivo.email) : 'Acceso Mayorista' }}
+
+        <button
+          class="action-btn-mayorista"
+          @click="toggleMenuCuenta"
+        >
+          <span>🏢</span>
+
+          {{
+            usuarioActivo
+              ? (usuarioActivo.nombre || usuarioActivo.email)
+              : 'Acceso Mayorista'
+          }}
         </button>
 
-        <div v-if="usuarioActivo && mostrarMenuCuenta" class="dropdown-cuenta">
+        <div
+          v-if="usuarioActivo && mostrarMenuCuenta"
+          class="dropdown-cuenta"
+        >
+
           <div class="dropdown-header">
-            <p>Conectado como:<br/><strong>{{ usuarioActivo.email }}</strong></p>
+            <p>
+              Conectado como:<br />
+              <strong>{{ usuarioActivo.email }}</strong>
+            </p>
           </div>
+
           <hr />
-          <button @click="irAlSitioPublico" class="dropdown-item">
+
+          <button
+            @click="irAlSitioPublico"
+            class="dropdown-item"
+          >
             🌐 Volver a Tienda
           </button>
-          <button @click="cerrarSesionMayorista" class="dropdown-item btn-salir">
+
+          <button
+            @click="cerrarSesionMayorista"
+            class="dropdown-item btn-salir"
+          >
             🚪 Cerrar Sesión
           </button>
+
         </div>
+
       </div>
+
     </div>
 
-    <!-- Nivel 2: Barra de navegación dedicada -->
+    <!-- Nivel 2: Barra de navegación -->
     <nav class="main-navbar-mayorista">
-      <div class="nav-links">
-        <button 
-          :class="{ active: pestañaActual === 'panel' }" 
-          @click="irAlPanelMayorista"
-        >
-          Gestión de Inventario
-        </button>
-      </div>
 
       <div class="tienda-link" @click="irAlSitioPublico">
         <span>← Volver al e-Commerce</span>
       </div>
+
     </nav>
+
   </header>
 </template>
 
@@ -204,39 +239,9 @@ const cerrarSesionMayorista = () => {
   background-color: #2e3943;
   padding: 0 40px;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   height: 46px;
-}
-
-.nav-links {
-  display: flex;
-  gap: 8px;
-}
-
-.nav-links button {
-  background: none;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  color: #cccccc;
-  font-size: 1rem;
-  font-weight: 500;
-  padding: 6px 14px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.nav-links button:hover {
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.2);
-  background-color: rgba(255, 255, 255, 0.05);
-}
-
-.nav-links button.active {
-  color: #ffffff;
-  font-weight: 700;
-  border-color: #b85141;
-  background-color: rgba(184, 81, 65, 0.2);
 }
 
 .tienda-link {
