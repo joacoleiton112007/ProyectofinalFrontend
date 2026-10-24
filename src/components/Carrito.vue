@@ -1,21 +1,55 @@
 <script setup>
-
+import { ref } from 'vue';
 import { useCarritoStore } from '@/stores/carritoStore';
 import { useRouter } from 'vue-router';
+import { apiFetch } from '@/services/api';
 
-// ¡Esta línea es la que faltaba o estaba mal nombrada!
 const carritoStore = useCarritoStore();
 const router = useRouter();
+const enviando = ref(false);
 
-const finalizarCompra = () => {
+const finalizarCompra = async () => {
   if (!carritoStore.estaAutenticado()) {
     alert('Debes iniciar sesión para finalizar tu compra mayorista.');
-   router.push('/');
-  } else {
-    alert('¡Procesando pedido mayorista!');
+    router.push('/');
+    return;
+  }
+
+  if (enviando.value) return;
+  enviando.value = true;
+
+  // Se abre la pestaña ya, dentro del click, para que el navegador no la bloquee
+  const ventana = window.open('', '_blank');
+
+  try {
+    const data = await apiFetch('/compras', {
+      method: 'POST',
+      body: JSON.stringify({
+        productos: carritoStore.items.map((item) => ({
+          producto_id: item.id,
+          cantidad: item.cantidad,
+        })),
+      }),
+    });
+
+    carritoStore.vaciarCarrito();
+
+    if (data.whatsapp_url && ventana) {
+      ventana.location.href = data.whatsapp_url;
+    } else if (ventana) {
+      ventana.close();
+    }
+
+    alert('¡Pedido registrado correctamente!');
+    router.push('/listado');
+  } catch (error) {
+    if (ventana) ventana.close();
+    alert(error.message || 'No se pudo procesar el pedido. Intentá de nuevo.');
+  } finally {
+    enviando.value = false;
   }
 };
-</script>
+</script>s
 
 <template>
   <div class="carrito-container">
@@ -54,7 +88,9 @@ const finalizarCompra = () => {
 
       <div class="resumen">
         <h3>Total: ${{ Number(carritoStore.total || 0).toLocaleString('es-UY') }}</h3>
-        <button @click="finalizarCompra" class="btn-comprar">Finalizar Compra</button>
+       <button @click="finalizarCompra" :disabled="enviando" class="btn-comprar">
+  {{ enviando ? 'Procesando...' : 'Finalizar Compra' }}
+</button>
       </div>
     </div>
   </div>

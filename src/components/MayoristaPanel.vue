@@ -1,10 +1,12 @@
 <script setup>
+import PedidosMayorista from './PedidosMayorista.vue';
 import { ref, onMounted } from 'vue'
 import { apiFetch } from '@/services/api.js'
 
 const productos = ref([])
 const categorias = ref([])
 const cargando = ref(false)
+const mostrarPedidos = ref(false)
 
 const origenImagen = ref('lista')
 const imagenBase64Procesada = ref('') // <--- Guardará el string Base64 al subir archivo
@@ -268,6 +270,15 @@ onMounted(() => {
         </tbody>
       </table>
     </section>
+
+    <!-- PEDIDOS RECIBIDOS -->
+    <div class="barra-pedidos">
+      <button type="button" class="btn-pedidos" @click="mostrarPedidos = !mostrarPedidos">
+        {{ mostrarPedidos ? '🔽 Ocultar pedidos recibidos' : '📦 Ver pedidos recibidos' }}
+      </button>
+    </div>
+
+    <PedidosMayorista v-if="mostrarPedidos" />
   </div>
 </template>
 
@@ -375,6 +386,27 @@ onMounted(() => {
 
 .btn-guardar:hover {
   background-color: #7e1b1b;
+}
+
+.barra-pedidos {
+  margin-bottom: 30px;
+}
+
+.btn-pedidos {
+  background-color: #334155;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-pedidos:hover {
+  background-color: #1e293b;
 }
 
 .tabla-custom {

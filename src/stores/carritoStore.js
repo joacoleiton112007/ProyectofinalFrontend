@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
+const CANTIDAD_MIN = 10;
+const CANTIDAD_MAX = 25;
+
 export const useCarritoStore = defineStore('carrito', () => {
   // Carga inicial desde localStorage para persistencia
   const datosGuardados = localStorage.getItem('prendas_carrito');
@@ -11,10 +14,10 @@ export const useCarritoStore = defineStore('carrito', () => {
     localStorage.setItem('prendas_carrito', JSON.stringify(items.value));
   };
 
-  // Verificar autenticación estricta (Mantenida por si la usás en otras vistas o futuro checkout)
+  // Verificar autenticación estricta
   const estaAutenticado = () => {
     const usuario = localStorage.getItem('usuario_activo');
-    
+
     if (!usuario || usuario === 'null' || usuario === 'undefined') {
       return false;
     }
@@ -27,49 +30,47 @@ export const useCarritoStore = defineStore('carrito', () => {
     }
   };
 
-  const agregarAlCarrito = (prenda) => {
-    // Nota: Quitamos el bloque de `if (!estaAutenticado())` para permitir 
-    // que el usuario agregue prendas al carrito de forma anónima.
+  // Misma regla que el servidor: 10 = 20%, 20 = 30%, 25 = 35%
+  const porcentajeDescuento = (cantidad) => {
+    if (cantidad >= 25) return 35;
+    if (cantidad >= 20) return 30;
+    return 20;
+  };
 
-    // Busca por isbn o por id
+  // El precio guardado en la base es el del pack x10; el unitario sale de ahí
+  const actualizarPreciosEspeciales = () => {
+    items.value.forEach((item) => {
+      if (!item.precio_pack) return;
+
+      const descuento = porcentajeDescuento(item.cantidad);
+      item.precio = Math.round((item.precio_pack / 10) * ((100 - descuento) / 100));
+      item.descuentoAplicado = descuento;
+    });
+  };
+
+  const agregarAlCarrito = (prenda) => {
+    // Permite agregar prendas de forma anónima (el login se pide al finalizar)
     const idPrenda = prenda.isbn || prenda.id;
     const existe = items.value.find((item) => (item.isbn || item.id) === idPrenda);
-    const cantidadASumar = prenda.cantidad || 1;
+    const cantidadASumar = Number(prenda.cantidad) || CANTIDAD_MIN;
 
     if (existe) {
-      existe.cantidad += cantidadASumar;
+      existe.cantidad = Math.min(CANTIDAD_MAX, existe.cantidad + cantidadASumar);
     } else {
-      items.value.push({ 
-        ...prenda, 
-        cantidad: cantidadASumar 
+      items.value.push({
+        ...prenda,
+        precio_pack: Number(prenda.precio_pack ?? prenda.precio_uyu ?? prenda.precio) || 0,
+        cantidad: Math.min(CANTIDAD_MAX, Math.max(CANTIDAD_MIN, cantidadASumar)),
       });
     }
 
-    // Actualiza precios con descuento si corresponde por volumen
     actualizarPreciosEspeciales();
-
     guardarEnStorage();
 
-    return { 
-      exito: true, 
-      mensaje: 'Prenda agregada al carrito con éxito.' 
+    return {
+      exito: true,
+      mensaje: 'Prenda agregada al carrito con éxito.'
     };
-  };
-
-  // Recalcula el precio unitario si el ítem individual alcanza/supera las 10 unidades
-  const actualizarPreciosEspeciales = () => {
-    items.value.forEach(item => {
-      const precioBase = item.precio_uyu || item.precio_original || item.precio;
-      if (!item.precio_original) item.precio_original = precioBase;
-
-      if (item.cantidad >= 10) {
-        item.precio = item.precio_unitario || Math.round(precioBase * 0.7); // 30% OFF Mayorista
-        item.descuentoAplicado = 30;
-      } else {
-        item.precio = item.precio_original;
-        item.descuentoAplicado = 0;
-      }
-    });
   };
 
   const ModificarCantidad = (id, nuevaCantidad) => {
@@ -78,7 +79,7 @@ export const useCarritoStore = defineStore('carrito', () => {
       if (nuevaCantidad <= 0) {
         eliminarDelCarrito(id);
       } else {
-        item.cantidad = nuevaCantidad;
+        item.cantidad = Math.min(CANTIDAD_MAX, Math.max(CANTIDAD_MIN, nuevaCantidad));
         actualizarPreciosEspeciales();
         guardarEnStorage();
       }
@@ -103,14 +104,14 @@ export const useCarritoStore = defineStore('carrito', () => {
     return items.value.reduce((acc, item) => acc + item.cantidad, 0);
   });
 
-  return { 
-    items, 
-    agregarAlCarrito, 
+  return {
+    items,
+    agregarAlCarrito,
     ModificarCantidad,
-    eliminarDelCarrito, 
+    eliminarDelCarrito,
     vaciarCarrito,
-    total, 
-    cantidadTotalItems, 
-    estaAutenticado 
+    total,
+    cantidadTotalItems,
+    estaAutenticado
   };
 });

@@ -221,11 +221,10 @@ const agregarAlCarrito = () => {
 
     ...libro.value,
 
-    precio: precioUnitario.value,
+    // Se manda el precio del pack; el store calcula el unitario con el descuento
+    precio_pack: Number(libro.value.precio || libro.value.precio_uyu) || 0,
 
-    cantidad: cantidad.value,
-
-    descuentoAplicado: porcentajeDescuento.value
+    cantidad: cantidad.value
 
   };
 
